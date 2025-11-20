@@ -15,7 +15,8 @@ A fully-customizable **ESP32-S2 (LOLIN S2 Pico)** macropad featuring:
 - **Serial CLI for updating profiles**
 
 Designed for **Git / Linux / development workflows**.
-![Uploading image.png…]()
+<img width="709" height="698" alt="image" src="https://github.com/user-attachments/assets/0003f9b6-e20b-4d1a-904a-aaf0c55a2186" />
+
 
 ---
 
