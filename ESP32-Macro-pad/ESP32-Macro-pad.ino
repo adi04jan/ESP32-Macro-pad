@@ -19,6 +19,8 @@
 
 #include <ctype.h>
 
+#define version "0.0.1"
+
 // ----------------------------- User Pin Definitions ----------------------
 // Lolin S2 Pico (confirmed by you)
 #define TOUCH_PIN_1 2   // GPIO2 (touch-capable)
