@@ -1,0 +1,219 @@
+{
+    "profile_name": "Linux Power Tools",
+    "idle_animation": "breathe",
+    "default_delay": 20,
+    "keys": [
+        {
+            "id": 1,
+            "name": "tail syslog",
+            "led_color": [
+                0,
+                255,
+                0
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "tail -f /var/log/syslog"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "dmesg -w",
+            "led_color": [
+                30,
+                255,
+                30
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "dmesg -w"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "grep errors",
+            "led_color": [
+                50,
+                255,
+                50
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "egrep -i 'error|fail|critical'"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "jq pretty",
+            "led_color": [
+                80,
+                255,
+                80
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "jq '.'"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "name": "ip addr",
+            "led_color": [
+                100,
+                255,
+                100
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "ip a"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "name": "ip route",
+            "led_color": [
+                120,
+                255,
+                120
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "ip route"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "name": "restart svc",
+            "led_color": [
+                150,
+                255,
+                150
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "sudo systemctl restart "
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "name": "journalctl",
+            "led_color": [
+                180,
+                255,
+                180
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "journalctl -xe"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "name": "NMEA lat/lon",
+            "led_color": [
+                0,
+                200,
+                0
+            ],
+            "actions": [
+                {
+                    "type": "multiline",
+                    "value": "grep GPRMC log.txt | awk -F',' '{print \"lat=\" $4 \", lon=\" $6}'"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "name": "route reload",
+            "led_color": [
+                0,
+                255,
+                140
+            ],
+            "actions": [
+                {
+                    "type": "multiline",
+                    "value": "ip route del 172.203.113.16\nip route add 172.203.113.16 dev wlan0"
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "name": "screen -r",
+            "led_color": [
+                50,
+                255,
+                150
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "screen -r"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "name": "clear",
+            "led_color": [
+                0,
+                150,
+                0
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "clear"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        }
+    ]
+}

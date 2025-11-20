@@ -1,0 +1,219 @@
+{
+    "profile_name": "Git Power Workflow",
+    "idle_animation": "rainbow",
+    "default_delay": 20,
+    "keys": [
+        {
+            "id": 1,
+            "name": "git status",
+            "led_color": [
+                0,
+                120,
+                255
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git status"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "git pull --rebase",
+            "led_color": [
+                0,
+                150,
+                255
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git pull --rebase"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "git fetch",
+            "led_color": [
+                0,
+                180,
+                255
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git fetch --all --prune"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "commit -m",
+            "led_color": [
+                0,
+                200,
+                240
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git add . && git commit -m \""
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "name": "commit --amend",
+            "led_color": [
+                0,
+                220,
+                220
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git commit --amend --no-edit"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 6,
+            "name": "git checkout",
+            "led_color": [
+                0,
+                255,
+                200
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git checkout "
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "name": "git rebase",
+            "led_color": [
+                50,
+                255,
+                220
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git rebase "
+                }
+            ]
+        },
+        {
+            "id": 8,
+            "name": "resolve conflicts",
+            "led_color": [
+                255,
+                120,
+                0
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git mergetool --tool=vimdiff"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 9,
+            "name": "git diff",
+            "led_color": [
+                0,
+                200,
+                150
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git diff"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 10,
+            "name": "git log",
+            "led_color": [
+                0,
+                150,
+                180
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git log --oneline --graph --decorate"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "id": 11,
+            "name": "stash push",
+            "led_color": [
+                80,
+                220,
+                255
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git stash push -m \""
+                }
+            ]
+        },
+        {
+            "id": 12,
+            "name": "stash pop",
+            "led_color": [
+                0,
+                100,
+                255
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git stash pop"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        }
+    ]
+}
