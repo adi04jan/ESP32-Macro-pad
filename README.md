@@ -1,5 +1,6 @@
 # ESP32-Macro-pad
 ESP32 S2 lolin mini powered Macro pad, Inspired by Work Louder Creator Micro but for programmer
+<img width="712" height="560" alt="image" src="https://github.com/user-attachments/assets/45e009f4-ea78-450a-b862-cfce8e7b1cef" />
 
 ### 12-Key Programmable Macropad • JSON Profiles • Touch Switching • RGB WS2812 • HID Keyboard/Mouse
 
@@ -14,6 +15,7 @@ A fully-customizable **ESP32-S2 (LOLIN S2 Pico)** macropad featuring:
 - **Serial CLI for updating profiles**
 
 Designed for **Git / Linux / development workflows**.
+![Uploading image.png…]()
 
 ---
 
