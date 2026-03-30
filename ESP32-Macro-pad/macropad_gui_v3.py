@@ -497,6 +497,13 @@ class MacropadV3App(ctk.CTk):
         self.set_active_btn = ctk.CTkButton(file_box, text="Set Active", command=self.set_active_profile, state="disabled")
         self.set_active_btn.pack(padx=10, pady=5)
 
+        # Storage Info
+        self.storage_lbl = ctk.CTkLabel(file_box, text="Storage: Unknown", font=ctk.CTkFont(size=11))
+        self.storage_lbl.pack(padx=10, pady=(10, 0))
+        self.storage_bar = ctk.CTkProgressBar(file_box, height=10)
+        self.storage_bar.pack(padx=10, pady=(0, 10), fill="x")
+        self.storage_bar.set(0)
+
         # --- Global Settings ---
         set_box = ctk.CTkFrame(left_side)
         set_box.pack(fill="x", padx=10, pady=10)
@@ -776,6 +783,7 @@ class MacropadV3App(ctk.CTk):
                 self.append_console(f"Connected to {port} at 115200 baud.\n")
                 self.set_buttons_state("normal")
                 self.send_cmd("")
+                self.after(500, lambda: self.send_cmd("fsinfo"))
 
             except Exception as e:
                 messagebox.showerror("Connection Error", str(e))
@@ -809,6 +817,17 @@ class MacropadV3App(ctk.CTk):
     def handle_serial_line(self, line):
         clean_line = line.replace('\r', '').replace('\n', '')
         
+        if clean_line.startswith("FS_INFO:"):
+            try:
+                parts = clean_line.split(":")[1].split(",")
+                total = int(parts[0])
+                used = int(parts[1])
+                free = total - used
+                self.storage_lbl.configure(text=f"Storage: {used/1024:.1f} KB used / {free/1024:.1f} KB free")
+                if total > 0: self.storage_bar.set(used / total)
+            except: pass
+            return
+
         if "macropad:$" in clean_line:
             if self.capturing_file:
                 self.capturing_file = False
@@ -878,6 +897,7 @@ class MacropadV3App(ctk.CTk):
             self.send_cmd("###END###")
             self.after(0, lambda: self.append_console("Upload sequence sent.\n"))
             self.after(500, self.set_active_profile)
+            self.after(1000, lambda: self.send_cmd("fsinfo"))
 
         threading.Thread(target=save_thread, daemon=True).start()
 

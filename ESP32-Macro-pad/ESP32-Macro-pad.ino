@@ -556,7 +556,8 @@ void cliHandleLine(const String &line) {
   cmd.toLowerCase();
   String arg = (sp == -1) ? "" : s.substring(sp + 1);
   arg.trim();
-  if (cmd == "help") Serial.println("help ls cat setprofile <n> rebuild_msc status unmount reboot");
+  if (cmd == "help") Serial.println("help ls cat setprofile <n> rebuild_msc status unmount reboot fsinfo");
+  else if (cmd == "fsinfo") { Serial.printf("FS_INFO:%u,%u\n", LittleFS.totalBytes(), LittleFS.usedBytes()); }
   else if (cmd == "ls") {
     File root = LittleFS.open("/");
     File f = root.openNextFile();
