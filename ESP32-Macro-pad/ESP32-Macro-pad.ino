@@ -404,10 +404,11 @@ void executeAction(JsonObject act) {
   if (type == "profile") { int p = act["value"] | 1; if (p < 1) p = 1; if (p > NUM_PROFILES) p = NUM_PROFILES; loadProfile(p); return; }
   if (type == "telephony") {
     String val = act["value"].as<String>();
-    if (val.equalsIgnoreCase("MIC_MUTE"))
-        sendTelephony(HID_USAGE_TELEPHONY_MIC_MUTE);
+    if (val.equalsIgnoreCase("MIC_MUTE")) sendTelephony(HID_USAGE_TELEPHONY_MIC_MUTE);
+    else if (val.equalsIgnoreCase("ANSWER")) sendTelephony(0x20); // Hook Switch
+    else if (val.equalsIgnoreCase("DECLINE")) sendTelephony(0x26); // Drop
     return;
-}
+  }
 }
 
 void runActions(JsonArray actions) {

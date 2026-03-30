@@ -13,7 +13,7 @@ ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 ACTION_TYPES = [
-    "text", "keycombo", "delay", "key", "hold", "release", "repeat",
+    "text", "keycombo", "delay", "key", "hold", "release",
     "media", "mouse_click", "mouse_move", "led", "led_anim", "profile", "telephony"
 ]
 
@@ -89,8 +89,9 @@ class ActionEditorRow(ctk.CTkFrame):
         self.value_frame.grid_columnconfigure(0, weight=1)
 
         self.value_entry = ctk.CTkEntry(self.value_frame, textvariable=self.value_var)
-        self.value_entry.grid(row=0, column=0, sticky="ew")
         self.value_entry.bind("<KeyRelease>", self.value_changed)
+        
+        self.value_combo = ctk.CTkComboBox(self.value_frame, variable=self.value_var, command=self.value_changed)
         
         self.record_btn = ctk.CTkButton(self.value_frame, text="Record", width=60, fg_color="orange", hover_color="darkorange", command=self.open_record_popup)
         
@@ -102,11 +103,46 @@ class ActionEditorRow(ctk.CTkFrame):
 
     def update_ui_for_type(self):
         t = self.type_var.get()
+        self.record_btn.grid_forget()
+        self.value_entry.grid_forget()
+        self.value_combo.grid_forget()
+        
         if t == "keycombo":
+            self.value_entry.grid(row=0, column=0, sticky="ew")
             self.record_btn.grid(row=0, column=1, padx=(5,0))
             self.value_entry.configure(state="readonly")
+        elif t == "media":
+            self.value_combo.configure(values=["PLAY_PAUSE", "STOP", "NEXT", "PREVIOUS", "MUTE", "VOLUME_UP", "VOLUME_DOWN"], state="readonly")
+            self.value_combo.grid(row=0, column=0, sticky="ew")
+            if self.value_var.get() not in self.value_combo.cget("values"):
+                self.value_var.set("PLAY_PAUSE")
+                self.value_changed()
+        elif t == "mouse_click":
+            self.value_combo.configure(values=["LEFT", "RIGHT", "MIDDLE"], state="readonly")
+            self.value_combo.grid(row=0, column=0, sticky="ew")
+            if self.value_var.get() not in self.value_combo.cget("values"):
+                self.value_var.set("LEFT")
+                self.value_changed()
+        elif t == "profile":
+            self.value_combo.configure(values=["1", "2", "3"], state="readonly")
+            self.value_combo.grid(row=0, column=0, sticky="ew")
+            if self.value_var.get() not in self.value_combo.cget("values"):
+                self.value_var.set("1")
+                self.value_changed()
+        elif t == "telephony":
+            self.value_combo.configure(values=["MIC_MUTE", "ANSWER", "DECLINE"], state="readonly")
+            self.value_combo.grid(row=0, column=0, sticky="ew")
+            if self.value_var.get() not in self.value_combo.cget("values"):
+                self.value_var.set("MIC_MUTE")
+                self.value_changed()
+        elif t == "led_anim":
+            self.value_combo.configure(values=["flash", "breathe", "none"], state="readonly")
+            self.value_combo.grid(row=0, column=0, sticky="ew")
+            if self.value_var.get() not in self.value_combo.cget("values"):
+                self.value_var.set("flash")
+                self.value_changed()
         else:
-            self.record_btn.grid_forget()
+            self.value_entry.grid(row=0, column=0, sticky="ew")
             self.value_entry.configure(state="normal")
             if t == "release":
                 self.value_entry.configure(state="disabled")
@@ -124,7 +160,6 @@ class ActionEditorRow(ctk.CTkFrame):
         if t in ["text", "key", "led_anim", "hold"]:
             self.value_var.set(d.get("value", d.get("key", "")))
         elif t == "delay": self.value_var.set(str(d.get("ms", 30)))
-        elif t == "repeat": self.value_var.set(str(d.get("count", 1)))
         elif t == "keycombo":
             keys = d.get("keys", [])
             self.value_var.set(", ".join(keys) if isinstance(keys, list) else str(keys))
@@ -155,9 +190,6 @@ class ActionEditorRow(ctk.CTkFrame):
         elif t == "hold": d["key"] = v
         elif t == "delay":
             try: d["ms"] = int(v)
-            except: pass
-        elif t == "repeat":
-            try: d["count"] = int(v)
             except: pass
         elif t == "keycombo": d["keys"] = [x.strip() for x in v.split(",") if x.strip()]
         elif t == "mouse_click": d["button"] = v
@@ -349,10 +381,21 @@ class MacropadV3App(ctk.CTk):
 
     def setup_autoswitch(self):
         self.tab_autoswitch.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(self.tab_autoswitch, text="Auto Switcher assigns specific window titles to switch to specific profiles automatically.", font=ctk.CTkFont(size=14)).grid(row=0, column=0, pady=10)
+        self.tab_autoswitch.grid_rowconfigure(2, weight=1)
+        
+        ctk.CTkLabel(self.tab_autoswitch, text="Auto Switcher Tracking", font=ctk.CTkFont(size=16, weight="bold")).grid(row=0, column=0, pady=10)
         ctk.CTkCheckBox(self.tab_autoswitch, text="Enable Background Auto-Switching", variable=self.auto_switch_enabled).grid(row=1, column=0, pady=10)
-        # We can implement full UI editing for rules if needed later.
-        ctk.CTkLabel(self.tab_autoswitch, text="Note: Add more advanced tracking features in future versions.", font=ctk.CTkFont(size=12, slant="italic")).grid(row=2, column=0, pady=30)
+        
+        self.tracking_console = ctk.CTkTextbox(self.tab_autoswitch, font=ctk.CTkFont(family="Consolas", size=12), text_color="cyan", state="disabled")
+        self.tracking_console.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
+        
+        ctk.CTkLabel(self.tab_autoswitch, text="Active Context rules: code -> v2, photoshop -> v3 (expand later).", font=ctk.CTkFont(size=12, slant="italic")).grid(row=3, column=0, pady=10)
+
+    def append_tracking_log(self, text):
+        self.tracking_console.configure(state="normal")
+        self.tracking_console.insert("end", text)
+        self.tracking_console.see("end")
+        self.tracking_console.configure(state="disabled")
 
     # --- Utility Methods ---
     def update_global_setting(self, key, val):
@@ -455,13 +498,14 @@ class MacropadV3App(ctk.CTk):
                         title = win.title.lower()
                         if title != last_active:
                             last_active = title
+                            self.after(0, self.append_tracking_log, f"Focus Changed -> [{title}]\n")
                             for keyword, profile_num in self.auto_switch_rules.items():
                                 if keyword in title:
+                                    self.after(0, self.append_tracking_log, f"   *** Triggered Rule: '{keyword}' -> Profile {profile_num} ***\n")
                                     if self.serial_port and self.serial_port.is_open:
                                         self.send_cmd(f"setprofile {profile_num}")
-                                        self.after(0, self.append_console, f"Auto-Switched to Profile {profile_num} ({keyword})\n")
                                     break
-                except Exception:
+                except Exception as e:
                     pass
             time.sleep(1.0)
 
