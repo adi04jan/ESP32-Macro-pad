@@ -89,7 +89,7 @@ unsigned long keyLastChange[NUM_KEYS];
 unsigned long keyLastPressMillis[NUM_KEYS];
 
 int currentProfile = 1;  // 1..NUM_PROFILES
-StaticJsonDocument<8192> profileDoc;
+DynamicJsonDocument profileDoc(24576);
 bool profileLoaded = false;
 int idleAnimation = 0;
 bool macroRunning = false;
