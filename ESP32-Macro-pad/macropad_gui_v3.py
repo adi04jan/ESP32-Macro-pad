@@ -69,6 +69,183 @@ class RecordKeycomboPopup(ctk.CTkToplevel):
         self.on_save(self.result_var.get())
         self.destroy()
 
+class AISettingsPopup(ctk.CTkToplevel):
+    def __init__(self, master):
+        super().__init__(master)
+        self.title("AI Settings")
+        self.geometry("450x250")
+        self.attributes('-topmost', 'true')
+        self.app_ref = master.app_ref
+        
+        cfg_frame = ctk.CTkFrame(self)
+        cfg_frame.pack(fill="both", expand=True, padx=20, pady=20)
+        
+        ctk.CTkLabel(cfg_frame, text="Provider:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.provider_var = ctk.StringVar(value=self.app_ref.app_settings.get("ai_provider", "Ollama (Local)"))
+        self.provider_combo = ctk.CTkComboBox(cfg_frame, values=["Ollama (Local)", "Gemini", "OpenAI"], variable=self.provider_var, command=self.on_provider_change)
+        self.provider_combo.grid(row=0, column=1, padx=5, pady=5, sticky="we")
+        
+        self.key_lbl = ctk.CTkLabel(cfg_frame, text="Key/URL:")
+        self.key_lbl.grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.key_var = ctk.StringVar(value=self.app_ref.app_settings.get("ai_key", "http://localhost:11434"))
+        self.key_entry = ctk.CTkEntry(cfg_frame, textvariable=self.key_var, width=250)
+        self.key_entry.grid(row=1, column=1, padx=5, pady=5, sticky="we")
+        
+        ctk.CTkLabel(cfg_frame, text="Model/Tag:").grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        self.model_var = ctk.StringVar(value=self.app_ref.app_settings.get("ai_model", "llama3:70b"))
+        self.model_entry = ctk.CTkEntry(cfg_frame, textvariable=self.model_var, width=250)
+        self.model_entry.grid(row=2, column=1, padx=5, pady=5, sticky="we")
+        
+        self.on_provider_change(self.provider_var.get(), initialize=True)
+        
+        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
+        btn_frame.pack(fill="x", padx=20, pady=(0,20))
+        ctk.CTkButton(btn_frame, text="Save", command=self.save_settings, width=100).pack(side="right")
+
+    def on_provider_change(self, val, initialize=False):
+        if val == "Ollama (Local)":
+            if not initialize: self.key_var.set(self.app_ref.app_settings.get("ai_key", "http://localhost:11434"))
+            self.key_lbl.grid()
+            self.key_entry.grid()
+            self.key_lbl.configure(text="Ollama URL:")
+            self.key_entry.configure(show="")
+        elif val == "Gemini":
+            if not initialize: self.key_var.set("")
+            self.key_lbl.grid()
+            self.key_entry.grid()
+            self.key_lbl.configure(text="API Key:")
+            self.key_entry.configure(show="*")
+        else:
+            if not initialize: self.key_var.set("")
+            self.key_lbl.grid()
+            self.key_entry.grid()
+            self.key_lbl.configure(text="API Key:")
+            self.key_entry.configure(show="*")
+
+    def save_settings(self):
+        self.app_ref.app_settings["ai_provider"] = self.provider_var.get()
+        self.app_ref.app_settings["ai_key"] = self.key_var.get().strip()
+        self.app_ref.app_settings["ai_model"] = self.model_var.get().strip()
+        self.app_ref.save_app_settings()
+        self.destroy()
+
+class AIGeneratorPopup(ctk.CTkToplevel):
+    def __init__(self, master, current_actions, on_generate):
+        super().__init__(master)
+        self.title("✨ Create Macro with AI")
+        self.geometry("550x300")
+        self.attributes('-topmost', 'true')
+        self.on_generate = on_generate
+        
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        
+        self.app_ref = master
+        
+        # Header Frame
+        header = ctk.CTkFrame(self, fg_color="transparent")
+        header.grid(row=0, column=0, sticky="ew", padx=10, pady=(10,0))
+        header.grid_columnconfigure(0, weight=1)
+        
+        lbl = ctk.CTkLabel(header, text="Describe what the macro should do:\n(e.g., 'Open notepad, type Hello World, and save it to desktop')", justify="left")
+        lbl.grid(row=0, column=0, sticky="w")
+        
+        settings_btn = ctk.CTkButton(header, text="⚙️ Settings", width=80, command=self.open_settings)
+        settings_btn.grid(row=0, column=1, sticky="e", padx=(10, 0))
+        
+        # Prompt Frame
+        self.prompt_text = ctk.CTkTextbox(self, height=100)
+        self.prompt_text.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        
+        # Action Frame
+        btn_frame = ctk.CTkFrame(self, fg_color="transparent")
+        btn_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 10))
+        
+        self.gen_btn = ctk.CTkButton(btn_frame, text="Generate Actions", fg_color="purple", hover_color="darkmagenta", command=self.generate)
+        self.gen_btn.pack(side="right", padx=5)
+        
+        self.status_lbl = ctk.CTkLabel(btn_frame, text="", text_color="cyan")
+        self.status_lbl.pack(side="left", padx=5)
+        
+    def open_settings(self):
+        AISettingsPopup(self)
+        
+    def generate(self):
+        prompt = self.prompt_text.get("1.0", "end-1c").strip()
+        if not prompt: return
+        
+        self.status_lbl.configure(text="Generating...")
+        self.gen_btn.configure(state="disabled")
+        
+        provider = self.app_ref.app_settings.get("ai_provider", "Ollama (Local)")
+        key = self.app_ref.app_settings.get("ai_key", "http://localhost:11434").strip()
+        model = self.app_ref.app_settings.get("ai_model", "llama3:70b").strip()
+        
+        threading.Thread(target=self._ai_worker, args=(provider, key, model, prompt), daemon=True).start()
+        
+    def _ai_worker(self, provider, key, model, prompt):
+        import urllib.request
+        import json
+        
+        system_prompt = "You are a Macropad JSON Generator. Respond ONLY with a raw JSON array of action objects. Do NOT include markdown blocks like ```json. Do NOT include any explanations. Supported types: text, keycombo, delay, key, hold, release, media, mouse_click, mouse_move, led, led_anim, profile, telephony. Modifiers: LEFT_GUI, LEFT_CTRL, LEFT_ALT, LEFT_SHIFT, ENTER, ESC, TAB, SPACE, BACKSPACE. E.g. prompt: 'open notepad and type hi' -> [{\"type\": \"keycombo\", \"keys\": [\"LEFT_GUI\", \"R\"]}, {\"type\": \"delay\", \"ms\": 500}, {\"type\": \"text\", \"value\": \"notepad\"}, {\"type\": \"key\", \"value\": \"ENTER\"}, {\"type\": \"delay\", \"ms\": 500}, {\"type\": \"text\", \"value\": \"hi\"}]"
+        
+        try:
+            result_text = ""
+            if provider == "Ollama (Local)":
+                model_name = model if model else "llama3"
+                req = urllib.request.Request(f"{key}/api/generate", method="POST", headers={"Content-Type": "application/json"})
+                data = json.dumps({"model": model_name, "prompt": f"{system_prompt}\nUser Prompt: {prompt}", "stream": False}).encode("utf-8")
+                with urllib.request.urlopen(req, data=data, timeout=120) as response:
+                    res = json.loads(response.read().decode())
+                    result_text = res.get("response", "")
+                    
+            elif provider == "Gemini":
+                model_name = model if model else "gemini-1.5-flash"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"
+                req = urllib.request.Request(url, method="POST", headers={"Content-Type": "application/json"})
+                data = json.dumps({
+                    "contents": [{"parts": [{"text": f"{system_prompt}\nUser Prompt: {prompt}"}]}]
+                }).encode("utf-8")
+                with urllib.request.urlopen(req, data=data, timeout=120) as response:
+                    res = json.loads(response.read().decode())
+                    result_text = res["candidates"][0]["content"]["parts"][0]["text"]
+                    
+            elif provider == "OpenAI":
+                model_name = model if model else "gpt-4o-mini"
+                req = urllib.request.Request("https://api.openai.com/v1/chat/completions", method="POST", headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"})
+                data = json.dumps({
+                    "model": model_name,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": prompt}
+                    ]
+                }).encode("utf-8")
+                with urllib.request.urlopen(req, data=data, timeout=120) as response:
+                    res = json.loads(response.read().decode())
+                    result_text = res["choices"][0]["message"]["content"]
+
+            result_text = result_text.strip()
+            if result_text.startswith("```json"): result_text = result_text[7:]
+            if result_text.startswith("```"): result_text = result_text[3:]
+            if result_text.endswith("```"): result_text = result_text[:-3]
+            
+            actions = json.loads(result_text.strip())
+            if isinstance(actions, list):
+                self.after(0, self.on_success, actions)
+            else:
+                self.after(0, self.on_error, "AI did not return a valid array.")
+                
+        except Exception as e:
+            self.after(0, self.on_error, str(e))
+            
+    def on_success(self, actions_list):
+        self.on_generate(actions_list)
+        self.destroy()
+
+    def on_error(self, err_msg):
+        self.status_lbl.configure(text=f"Error: {err_msg}", text_color="red")
+        self.gen_btn.configure(state="normal")
+
 class ActionEditorRow(ctk.CTkFrame):
     def __init__(self, master, action_dict, on_delete, on_change, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
@@ -141,11 +318,24 @@ class ActionEditorRow(ctk.CTkFrame):
             if self.value_var.get() not in self.value_combo.cget("values"):
                 self.value_var.set("flash")
                 self.value_changed()
+        elif t in ["key", "hold", "release"]:
+            common_keys = [
+                "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
+                "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",
+                "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+                "ENTER", "ESC", "BACKSPACE", "TAB", "SPACE", "MINUS", "EQUAL",
+                "LEFT_CTRL", "LEFT_SHIFT", "LEFT_ALT", "LEFT_GUI",
+                "RIGHT_CTRL", "RIGHT_SHIFT", "RIGHT_ALT", "RIGHT_GUI",
+                "UP_ARROW", "DOWN_ARROW", "LEFT_ARROW", "RIGHT_ARROW",
+                "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12"
+            ]
+            self.value_combo.configure(values=common_keys, state="normal")
+            self.value_combo.grid(row=0, column=0, sticky="ew")
+            if t == "release":
+                self.value_combo.configure(state="disabled")
         else:
             self.value_entry.grid(row=0, column=0, sticky="ew")
             self.value_entry.configure(state="normal")
-            if t == "release":
-                self.value_entry.configure(state="disabled")
 
     def open_record_popup(self):
         RecordKeycomboPopup(self, self.value_var.get(), self.on_record_save)
@@ -229,6 +419,8 @@ class MacropadV3App(ctk.CTk):
         self.profile_data = self.create_empty_profile()
         self.auto_switch_rules = {"code": 2, "photoshop": 3}
         self.auto_switch_enabled = ctk.BooleanVar(value=False)
+        self.app_settings = {"ai_provider": "Ollama (Local)", "ai_key": "http://localhost:11434", "ai_model": "llama3:70b"}
+        self.load_app_settings()
 
         # Tab Layout
         self.tabview = ctk.CTkTabview(self)
@@ -244,6 +436,19 @@ class MacropadV3App(ctk.CTk):
 
         self.auto_switch_thread = threading.Thread(target=self.auto_switch_loop, daemon=True)
         self.auto_switch_thread.start()
+
+    def load_app_settings(self):
+        try:
+            if os.path.exists("macropad_settings.json"):
+                with open("macropad_settings.json", "r") as f:
+                    self.app_settings.update(json.load(f))
+        except: pass
+
+    def save_app_settings(self):
+        try:
+            with open("macropad_settings.json", "w") as f:
+                json.dump(self.app_settings, f, indent=2)
+        except: pass
 
     def create_empty_profile(self):
         return {
@@ -372,7 +577,11 @@ class MacropadV3App(ctk.CTk):
         self.action_title = ctk.CTkLabel(header, text="Actions for Key 1", font=ctk.CTkFont(size=18, weight="bold"))
         self.action_title.grid(row=0, column=0, sticky="w")
         
-        ctk.CTkButton(header, text="+ Add Action", width=120, command=self.add_action).grid(row=0, column=1, sticky="e")
+        btn_frame = ctk.CTkFrame(header, fg_color="transparent")
+        btn_frame.grid(row=0, column=1, sticky="e")
+        
+        ctk.CTkButton(btn_frame, text="✨ AI", width=50, fg_color="purple", hover_color="darkmagenta", command=self.open_ai_generator).pack(side="left", padx=5)
+        ctk.CTkButton(btn_frame, text="+ Add", width=80, command=self.add_action).pack(side="left")
         
         self.action_scroll = ctk.CTkScrollableFrame(self.action_area)
         self.action_scroll.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
@@ -406,6 +615,19 @@ class MacropadV3App(ctk.CTk):
         except: pass
 
     # --- Key Selection & Actions ---
+    def open_ai_generator(self):
+        kdata = self.get_key_data(self.selected_key_id)
+        AIGeneratorPopup(self, kdata.get("actions", []), self.on_ai_generated)
+        
+    def on_ai_generated(self, new_actions_list):
+        kdata = self.get_key_data(self.selected_key_id)
+        # Append new AI actions to existing rather than replacing everything
+        if "actions" not in kdata:
+            kdata["actions"] = []
+        kdata["actions"].extend(new_actions_list)
+        self.refresh_action_editor()
+        self.sync_ui_to_data()
+
     def select_key(self, key_id):
         self.selected_key_id = key_id
         self.action_title.configure(text=f"Actions for Key {key_id}")
