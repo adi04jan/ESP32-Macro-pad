@@ -1,2 +1,11 @@
-pyserial>=3.5
+# ESP32 Macropad configurator (v2)
 customtkinter>=5.2.2
+pyserial>=3.5
+jsonschema>=4.20.0
+requests>=2.31.0
+
+# Optional: active-window context tracking
+pygetwindow>=0.0.9 ; sys_platform == "win32"
+
+# Dev / tests
+pytest>=8.0.0
