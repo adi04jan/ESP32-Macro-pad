@@ -70,10 +70,12 @@
     ],
   };
 
+  // Physical key positions captured from the hardware (top row swapped, third
+  // row reversed vs. the naive numbering).
   const LAYOUT = [
-    [null, 1, 2, null],
+    [null, 2, 1, null],
     [3, 4, 5, 6],
-    [7, 8, 9, 10],
+    [10, 9, 8, 7],
     [null, 11, 12, null],
   ];
 
