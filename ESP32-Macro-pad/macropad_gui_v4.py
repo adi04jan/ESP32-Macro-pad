@@ -2,12 +2,15 @@ import os
 import sys
 import json
 import time
+import queue
 import threading
 import serial
 import serial.tools.list_ports
 import customtkinter as ctk
 import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
+import urllib.request
+import re
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -27,6 +30,241 @@ TK_TO_ESP32_MAP = {
     "Insert": "INSERT", "Home": "HOME", "Prior": "PAGEUP", "Delete": "DELETE", "End": "END",
     "Next": "PAGEDOWN", "Right": "RIGHT_ARROW", "Left": "LEFT_ARROW", "Down": "DOWN_ARROW", "Up": "UP_ARROW"
 }
+
+class TemplatesManager:
+    def __init__(self, custom_file="macropad_templates.json", default_file="macropad_default_templates.json"):
+        self.custom_file = custom_file
+        self.default_file = default_file
+        self.custom_templates = {}
+        self.default_templates = {}
+        self.load()
+
+    def load(self):
+        try:
+            with open(self.default_file, 'r', encoding='utf-8') as f:
+                self.default_templates = json.load(f)
+        except:
+            self.default_templates = {}
+            
+        try:
+            with open(self.custom_file, 'r', encoding='utf-8') as f:
+                self.custom_templates = json.load(f)
+        except:
+            self.custom_templates = {}
+
+    def save(self):
+        try:
+            with open(self.custom_file, 'w', encoding='utf-8') as f:
+                json.dump(self.custom_templates, f, indent=4)
+        except Exception as e:
+            print("Error saving templates:", e)
+
+    def get_context_shortcuts(self, context):
+        context_lower = context.lower()
+        combined = []
+        seen_desc = set()
+        
+        def add_from_dict(d, ctx):
+            if ctx in d:
+                for s in d[ctx]:
+                    desc = s.get("description", "").lower()
+                    if desc not in seen_desc:
+                        combined.append(s)
+                        seen_desc.add(desc)
+                        
+        add_from_dict(self.custom_templates, context_lower)
+        add_from_dict(self.default_templates, context_lower)
+        
+        if not combined:
+            for key in self.custom_templates:
+                if key in context_lower or context_lower in key:
+                    add_from_dict(self.custom_templates, key)
+                    break
+            for key in self.default_templates:
+                if key in context_lower or context_lower in key:
+                    add_from_dict(self.default_templates, key)
+                    break
+                    
+        return combined
+
+    def add_shortcuts(self, context, new_shortcuts):
+        context_lower = context.lower()
+        if context_lower not in self.custom_templates:
+            self.custom_templates[context_lower] = []
+        
+        existing_desc = {s["description"].lower() for s in self.get_context_shortcuts(context_lower)}
+        
+        added = False
+        for s in new_shortcuts:
+            if s["description"].lower() not in existing_desc:
+                self.custom_templates[context_lower].append(s)
+                existing_desc.add(s["description"].lower())
+                added = True
+                
+        if added:
+            self.save()
+
+class AIQueueManager:
+    def __init__(self, app_ref):
+        self.app_ref = app_ref
+        self.queue = queue.Queue()
+        self.thread = threading.Thread(target=self.worker_loop, daemon=True)
+        self.thread.start()
+
+    def worker_loop(self):
+        while True:
+            task = self.queue.get()
+            if task is None: break
+            try:
+                self.process_task(task)
+            except Exception as e:
+                self.app_ref.append_tracking_log(f"AI Queue Error: {e}\n")
+            self.queue.task_done()
+
+    def process_task(self, task):
+        action = task.get("action")
+        context = task.get("context")
+        key_num = task.get("key_num", None)
+        
+        if action == "generate_and_validate":
+            self.app_ref.append_tracking_log(f"AI: Generating for [{context}]...\n")
+            raw_shortcuts = self.generate_shortcuts(context, key_num)
+            if raw_shortcuts:
+                self.app_ref.append_tracking_log(f"AI: Validating shortcuts for [{context}]...\n")
+                validated = self.validate_shortcuts(context, raw_shortcuts)
+                if validated:
+                    self.app_ref.append_tracking_log(f"AI: Added new validated shortcuts for [{context}].\n")
+                    self.app_ref.templates_mgr.add_shortcuts(context, validated)
+                    if self.app_ref.current_context == context:
+                        self.app_ref.after(0, self.app_ref.rec_widget.update_context, context, self.app_ref.templates_mgr.get_context_shortcuts(context), False)
+                        
+    def make_api_call(self, system_prompt, user_prompt):
+        provider = self.app_ref.app_settings.get("ai_provider", "Ollama (Local)")
+        key = self.app_ref.app_settings.get("ai_key", "http://localhost:11434").strip().rstrip('/')
+        model = self.app_ref.app_settings.get("ai_model", "llama3:70b").strip()
+        
+        debug = hasattr(self.app_ref, 'ai_debug_enabled') and self.app_ref.ai_debug_enabled.get()
+        if debug:
+            self.app_ref.append_tracking_log(f"\n[AI DEBUG] Provider: {provider} | Model: {model}\n")
+            self.app_ref.append_tracking_log(f"[AI DEBUG] Sys Prompt: {system_prompt[:50]}...\n")
+            self.app_ref.append_tracking_log(f"[AI DEBUG] Usr Prompt: {user_prompt}\n")
+            
+        result_text = ""
+        try:
+            if provider == "Ollama (Local)":
+                model_name = model if model else "llama3"
+                url = f"{key}/api/generate"
+                req = urllib.request.Request(url, method="POST", headers={"Content-Type": "application/json"})
+                payload = {"model": model_name, "prompt": f"{system_prompt}\nUser Prompt: {user_prompt}", "stream": False}
+                data = json.dumps(payload).encode("utf-8")
+                
+                if debug:
+                    self.app_ref.append_tracking_log(f"[AI DEBUG] URL: {url}\n")
+                    self.app_ref.append_tracking_log(f"[AI DEBUG] Payload: {json.dumps(payload)}\n")
+                    
+                with urllib.request.urlopen(req, data=data, timeout=120) as response:
+                    raw_res = response.read().decode()
+                    if debug: self.app_ref.append_tracking_log(f"[AI DEBUG] Raw Response: {raw_res[:200]}...\n")
+                    res = json.loads(raw_res)
+                    result_text = res.get("response", "")
+                    
+            elif provider == "Gemini":
+                model_name = model if model else "gemini-1.5-flash"
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"
+                req = urllib.request.Request(url, method="POST", headers={"Content-Type": "application/json"})
+                payload = {"contents": [{"parts": [{"text": f"{system_prompt}\nUser Prompt: {user_prompt}"}]}]}
+                data = json.dumps(payload).encode("utf-8")
+                
+                if debug:
+                    self.app_ref.append_tracking_log(f"[AI DEBUG] URL: {url[:60]}...[HIDDEN_KEY]\n")
+                    self.app_ref.append_tracking_log(f"[AI DEBUG] Payload: {json.dumps(payload)}\n")
+                    
+                with urllib.request.urlopen(req, data=data, timeout=120) as response:
+                    raw_res = response.read().decode()
+                    if debug: self.app_ref.append_tracking_log(f"[AI DEBUG] Raw Response: {raw_res[:200]}...\n")
+                    res = json.loads(raw_res)
+                    result_text = res["candidates"][0]["content"]["parts"][0]["text"]
+                    
+            elif provider == "OpenAI":
+                model_name = model if model else "gpt-4o-mini"
+                url = "https://api.openai.com/v1/chat/completions"
+                req = urllib.request.Request(url, method="POST", headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"})
+                payload = {"model": model_name, "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]}
+                data = json.dumps(payload).encode("utf-8")
+                
+                if debug:
+                    self.app_ref.append_tracking_log(f"[AI DEBUG] URL: {url}\n")
+                    self.app_ref.append_tracking_log(f"[AI DEBUG] Payload: {json.dumps(payload)}\n")
+                    
+                with urllib.request.urlopen(req, data=data, timeout=120) as response:
+                    raw_res = response.read().decode()
+                    if debug: self.app_ref.append_tracking_log(f"[AI DEBUG] Raw Response: {raw_res[:200]}...\n")
+                    res = json.loads(raw_res)
+                    result_text = res["choices"][0]["message"]["content"]
+                    
+        except urllib.error.HTTPError as e:
+            err_msg = e.read().decode('utf-8', errors='replace')
+            if debug: self.app_ref.append_tracking_log(f"\n[AI ERROR] HTTP {e.code}: {err_msg}\n")
+            raise Exception(f"HTTP {e.code}: {err_msg}")
+        except Exception as e:
+            if debug: self.app_ref.append_tracking_log(f"\n[AI ERROR] Exception: {str(e)}\n")
+            raise e
+                
+        result_text = result_text.strip()
+        if result_text.startswith("```json"): result_text = result_text[7:]
+        if result_text.startswith("```"): result_text = result_text[3:]
+        if result_text.endswith("```"): result_text = result_text[:-3]
+        return result_text
+
+    def generate_shortcuts(self, context, key_num=None):
+        valid_keys = "LEFT_CTRL, RIGHT_CTRL, LEFT_SHIFT, RIGHT_SHIFT, LEFT_ALT, ENTER, ESC, TAB, SPACE, F1-F12, A-Z, 0-9, UP_ARROW, DOWN_ARROW, LEFT_ARROW, RIGHT_ARROW, MINUS, EQUAL, TILDE"
+        system_prompt = f"""You are an advanced Macro Shortcut Generator for a developer. 
+CRITICAL: Respond ONLY with a raw JSON array. DO NOT wrap the output in markdown code blocks (e.g. no ```json).
+Valid keys for keycombo: {valid_keys}.
+JSON Schema:
+[
+  {{"key_num": 1, "description": "Save File", "actions": [{{"type":"keycombo","keys":["LEFT_CTRL","S"]}}]}},
+  {{"key_num": 2, "description": "Git Status", "actions": [{{"type":"text","value":"git status"}}, {{"type":"key","value":"ENTER"}}]}}
+]"""
+
+        user_prompt = f"Context: {context}.\nGenerate 4 new, unique, robust and highly productive keyboard shortcuts for this context."
+        
+        custom_existing = self.app_ref.templates_mgr.custom_templates.get(context.lower(), [])
+        if custom_existing:
+            existing_desc = [s.get("description", "") for s in custom_existing][-10:]
+            user_prompt += f"\n\nPersonalization Context - You already have these shortcuts: {', '.join(existing_desc)}.\nDO NOT duplicate these. Adapt your suggestions based on this workflow style."
+
+        if key_num:
+            user_prompt += f"\nSpecifically assign the generated shortcuts to key_num: {key_num}."
+            
+        try:
+            res = self.make_api_call(system_prompt, user_prompt)
+            if res.startswith("```json"): res = res[7:]
+            if res.startswith("```"): res = res[3:]
+            if res.endswith("```"): res = res[:-3]
+            parsed = json.loads(res.strip())
+            return parsed if isinstance(parsed, list) else None
+        except Exception as e:
+            self.app_ref.append_tracking_log(f"Generation error: {e}\n")
+            return None
+
+    def validate_shortcuts(self, context, shortcuts):
+        valid_keys = "LEFT_CTRL, RIGHT_CTRL, LEFT_SHIFT, RIGHT_SHIFT, LEFT_ALT, ENTER, ESC, TAB, SPACE, F1-F12, A-Z, 0-9, UP_ARROW, DOWN_ARROW, LEFT_ARROW, RIGHT_ARROW, MINUS, EQUAL, TILDE"
+        system_prompt = f"""You are a Validator. Ensure the JSON array is perfectly valid for Macropad actions. 
+CRITICAL: Respond ONLY with a raw JSON array. DO NOT use markdown formatting.
+Fix impossible key combinations. Ensure 'keys' or 'value' only use: {valid_keys}."""
+        user_prompt = f"Context: {context}\nValidate and fix this JSON:\n{json.dumps(shortcuts)}"
+        
+        try:
+            res = self.make_api_call(system_prompt, user_prompt)
+            if res.startswith("```json"): res = res[7:]
+            if res.startswith("```"): res = res[3:]
+            if res.endswith("```"): res = res[:-3]
+            parsed = json.loads(res.strip())
+            return parsed if isinstance(parsed, list) else shortcuts
+        except Exception as e:
+            self.app_ref.append_tracking_log(f"Validation error: {e}\n")
+            return shortcuts
 
 class RecordKeycomboPopup(ctk.CTkToplevel):
     def __init__(self, master, current_value, on_save):
@@ -75,7 +313,7 @@ class AISettingsPopup(ctk.CTkToplevel):
         self.title("AI Settings")
         self.geometry("450x250")
         self.attributes('-topmost', 'true')
-        self.app_ref = master.app_ref
+        self.app_ref = master if hasattr(master, 'app_settings') else master.app_ref
         
         cfg_frame = ctk.CTkFrame(self)
         cfg_frame.pack(fill="both", expand=True, padx=20, pady=20)
@@ -129,57 +367,50 @@ class AISettingsPopup(ctk.CTkToplevel):
         self.app_ref.save_app_settings()
         self.destroy()
 
-class AIGeneratorPopup(ctk.CTkToplevel):
-    def __init__(self, master, current_actions, on_generate):
+class WidgetSettingsPopup(ctk.CTkToplevel):
+    def __init__(self, master):
         super().__init__(master)
-        self.title("✨ Create Macro with AI")
-        self.geometry("550x300")
+        self.title("Widget Settings")
+        self.geometry("350x200")
         self.attributes('-topmost', 'true')
-        self.on_generate = on_generate
+        self.app_ref = master if hasattr(master, 'app_settings') else master.app_ref
         
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
+        cfg_frame = ctk.CTkFrame(self)
+        cfg_frame.pack(fill="both", expand=True, padx=20, pady=20)
         
-        self.app_ref = master
+        ctk.CTkLabel(cfg_frame, text="Transparency:").grid(row=0, column=0, padx=5, pady=10, sticky="e")
+        self.alpha_var = ctk.DoubleVar(value=self.app_ref.app_settings.get("widget_alpha", 0.98))
+        self.alpha_slider = ctk.CTkSlider(cfg_frame, from_=0.1, to=1.0, variable=self.alpha_var, command=self.on_alpha_change)
+        self.alpha_slider.grid(row=0, column=1, padx=5, pady=10, sticky="we")
         
-        # Header Frame
-        header = ctk.CTkFrame(self, fg_color="transparent")
-        header.grid(row=0, column=0, sticky="ew", padx=10, pady=(10,0))
-        header.grid_columnconfigure(0, weight=1)
-        
-        lbl = ctk.CTkLabel(header, text="Describe what the macro should do:\n(e.g., 'Open notepad, type Hello World, and save it to desktop')", justify="left")
-        lbl.grid(row=0, column=0, sticky="w")
-        
-        settings_btn = ctk.CTkButton(header, text="⚙️ Settings", width=80, command=self.open_settings)
-        settings_btn.grid(row=0, column=1, sticky="e", padx=(10, 0))
-        
-        # Prompt Frame
-        self.prompt_text = ctk.CTkTextbox(self, height=100)
-        self.prompt_text.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
-        
-        # Action Frame
         btn_frame = ctk.CTkFrame(self, fg_color="transparent")
-        btn_frame.grid(row=2, column=0, sticky="ew", padx=10, pady=(0, 10))
-        
-        self.gen_btn = ctk.CTkButton(btn_frame, text="Generate Actions", fg_color="purple", hover_color="darkmagenta", command=self.generate)
-        self.gen_btn.pack(side="right", padx=5)
-        
-        self.status_lbl = ctk.CTkLabel(btn_frame, text="", text_color="cyan")
-        self.status_lbl.pack(side="left", padx=5)
-        
-    def open_settings(self):
-        AISettingsPopup(self)
-        
+        btn_frame.pack(fill="x", padx=20, pady=(0,20))
+        ctk.CTkButton(btn_frame, text="Save", command=self.save_settings, width=100).pack(side="right")
+
+    def on_alpha_change(self, val):
+        if hasattr(self.app_ref, 'rec_widget') and self.app_ref.rec_widget.winfo_exists():
+            self.app_ref.rec_widget.attributes("-alpha", val)
+
+    def save_settings(self):
+        self.app_ref.app_settings["widget_alpha"] = self.alpha_var.get()
+        self.app_ref.save_app_settings()
+        self.destroy()
+
+
 class RecommendationWidget(ctk.CTkToplevel):
     def __init__(self, master):
         super().__init__(master)
         self.title("Macropad AI")
-        self.geometry("350x260+20+20") 
+        self.geometry("360x300+20+20") 
         self.attributes('-topmost', 'true')
         self.overrideredirect(True) 
-        self.attributes("-alpha", 0.98) 
+        self.app_ref = master
+        self.attributes("-alpha", self.app_ref.app_settings.get("widget_alpha", 0.98)) 
         
-        # VS Code-inspired Dark Theme Colors
+        self.current_context = ""
+        self.options_map = {1: [], 2: [], 3: [], 4: []}
+        self.index_map = {1: 0, 2: 0, 3: 0, 4: 0}
+        
         bg_color = "#252526"
         border_color = "#3c3c3c"
         header_bg = "#333333"
@@ -198,18 +429,19 @@ class RecommendationWidget(ctk.CTkToplevel):
         close_btn = ctk.CTkButton(self.top_bar, text="✕", width=28, height=28, corner_radius=0, fg_color="transparent", text_color="#aaaaaa", hover_color="#e81123", command=self.withdraw)
         close_btn.pack(side="right")
         
+        settings_btn = ctk.CTkButton(self.top_bar, text="⚙", width=28, height=28, corner_radius=0, fg_color="transparent", text_color="#aaaaaa", hover_color="#555555", command=lambda: WidgetSettingsPopup(self.app_ref))
+        settings_btn.pack(side="right")
+        
         self.status = ctk.CTkLabel(self.main_frame, text="", text_color="#888888", font=ctk.CTkFont(family="Consolas", size=11, slant="italic"))
         
         self.list_frame = ctk.CTkFrame(self.main_frame, fg_color="transparent")
         self.list_frame.pack(fill="both", expand=True, padx=2, pady=4)
         
-        # Movable Handles
         self.top_bar.bind("<ButtonPress-1>", self.start_move)
         self.top_bar.bind("<B1-Motion>", self.do_move)
         self.header.bind("<ButtonPress-1>", self.start_move)
         self.header.bind("<B1-Motion>", self.do_move)
         
-        # Invisible Resize Grip in corner
         self.grip = ctk.CTkLabel(self.main_frame, text="", width=15, height=15, fg_color="transparent", cursor="size_nw_se")
         self.grip.place(relx=1.0, rely=1.0, anchor="se")
         self.grip.bind("<ButtonPress-1>", self.start_resize)
@@ -236,159 +468,111 @@ class RecommendationWidget(ctk.CTkToplevel):
         deltax = event.x_root - self._resize_start_x
         deltay = event.y_root - self._resize_start_y
         new_w = max(260, self._start_width + deltax)
-        new_h = max(180, self._start_height + deltay)
+        new_h = max(200, self._start_height + deltay)
         self.geometry(f"{new_w}x{new_h}+{self.winfo_x()}+{self.winfo_y()}")
 
-    def update_context(self, app_name, shortcuts=None, is_generating=False):
-        self.header.configure(text=f" {app_name[:25]}")
+    def update_context(self, context_name, shortcuts=None, is_generating=False):
+        self.current_context = context_name
+        self.header.configure(text=f" {context_name[:25]}")
         
         for w in self.list_frame.winfo_children(): w.destroy()
             
-        if is_generating:
+        if is_generating and not shortcuts:
             self.status.configure(text="Generating AI shortcuts...", text_color="#007acc")
             self.status.pack(pady=40)
             return
             
         self.status.pack_forget()
+        
+        self.options_map = {1: [], 2: [], 3: [], 4: []}
         if shortcuts:
             for s in shortcuts:
-                if 1 <= s.get("key_num", 0) <= 4:
-                    row = ctk.CTkFrame(self.list_frame, fg_color="transparent", corner_radius=0, height=46)
-                    row.pack(fill="x", pady=2)
-                    row.pack_propagate(False)
+                knum = s.get("key_num", 0)
+                if 1 <= knum <= 4:
+                    self.options_map[knum].append(s)
                     
-                    # Blue accent bar mimicking VS Code active file indicator
-                    ctk.CTkFrame(row, width=3, fg_color="#007acc", corner_radius=0).pack(side="left", fill="y")
-                    
-                    chip = ctk.CTkLabel(row, text=f"K{s['key_num']}", fg_color="#37373d", corner_radius=2, width=24, font=ctk.CTkFont(family="Consolas", size=10, weight="bold"), text_color="#d4d4d4")
-                    chip.pack(side="left", padx=(6, 8), pady=10)
-                    
-                    # Layout holding Description + Details
-                    text_col = ctk.CTkFrame(row, fg_color="transparent")
-                    text_col.pack(side="left", fill="both", expand=True)
-                    
-                    desc = ctk.CTkLabel(text_col, text=s.get('description', '')[:28], anchor="w", font=ctk.CTkFont(size=12, weight="bold"), text_color="#cccccc")
-                    desc.pack(side="top", anchor="w", pady=(5, 0))
-                    
-                    act_strs = []
-                    for act in s.get("actions", []):
-                        t = act.get("type", "")
-                        if t == "keycombo": act_strs.append("+".join(act.get("keys", [])))
-                        elif t == "text": act_strs.append(f"'{act.get('value', '')}'")
-                        elif t in ["key", "hold", "release"]: act_strs.append(str(act.get("value", act.get("key", ""))))
-                        elif t == "delay": act_strs.append(f"{act.get('ms', 0)}ms")
-                        elif t == "media": act_strs.append(str(act.get("value", "")))
-                        else: act_strs.append(t)
-                    
-                    macro_txt = " → ".join(act_strs) if act_strs else "Empty Array"
-                    if len(macro_txt) > 35: macro_txt = macro_txt[:32] + "..."
-                    
-                    details = ctk.CTkLabel(text_col, text=macro_txt, anchor="w", font=ctk.CTkFont(family="Consolas", size=10), text_color="#858585")
-                    details.pack(side="top", anchor="w", pady=(0, 4))
-                    
-                    # Modular hover effect
-                    hover_targets = [row, text_col, desc, details]
-                    def enter_hover(e, trg=hover_targets):
-                        for t in trg: t.configure(fg_color="#2a2d2e" if t == row else "transparent")
-                    def leave_hover(e, trg=hover_targets):
-                        for t in trg: t.configure(fg_color="transparent")
-                        
-                    for target in hover_targets:
-                        target.bind("<Enter>", enter_hover)
-                        target.bind("<Leave>", leave_hover)
-                    
-                    btn_down = ctk.CTkButton(row, text="▼", width=22, corner_radius=0, fg_color="transparent", hover_color="#37373d", font=ctk.CTkFont(size=10), text_color="#888888")
-                    btn_down.configure(command=lambda sid=s.get("id"), btn=btn_down: self.vote(sid, False, btn_down))
-                    btn_down.pack(side="right", fill="y", padx=1)
-                    
-                    btn_up = ctk.CTkButton(row, text="▲", width=22, corner_radius=0, fg_color="transparent", hover_color="#37373d", font=ctk.CTkFont(size=10), text_color="#888888")
-                    btn_up.configure(command=lambda sid=s.get("id"), btn=btn_up: self.vote(sid, True, btn_up))
-                    btn_up.pack(side="right", fill="y", padx=1)
+        for i in range(1, 5):
+            self.render_key_row(i)
+
+    def render_key_row(self, knum):
+        opts = self.options_map[knum]
+        idx = self.index_map.setdefault(knum, 0)
+        
+        row = ctk.CTkFrame(self.list_frame, fg_color="transparent", corner_radius=0, height=52)
+        row.pack(fill="x", pady=2)
+        row.pack_propagate(False)
+        
+        ctk.CTkFrame(row, width=3, fg_color="#007acc", corner_radius=0).pack(side="left", fill="y")
+        
+        chip = ctk.CTkLabel(row, text=f"K{knum}", fg_color="#37373d", corner_radius=2, width=24, font=ctk.CTkFont(family="Consolas", size=10, weight="bold"), text_color="#d4d4d4")
+        chip.pack(side="left", padx=(6, 8), pady=10)
+        
+        text_col = ctk.CTkFrame(row, fg_color="transparent")
+        text_col.pack(side="left", fill="both", expand=True)
+        
+        if len(opts) == 0:
+            desc = ctk.CTkLabel(text_col, text="No shortcut assigned", anchor="w", font=ctk.CTkFont(size=12, slant="italic"), text_color="#888888")
+            desc.pack(side="top", anchor="w", pady=(15, 0))
         else:
-            self.status.configure(text="No shortcuts currently available.", text_color="#888888")
-            self.status.pack(pady=40)
-
-    def vote(self, shortcut_id, is_like, btn_ref):
-        if not shortcut_id: return
-        import macropad_db
-        macropad_db.vote_shortcut(shortcut_id, is_like)
-        btn_ref.configure(state="disabled", text="•", text_color="#555555")
-
-    def generate(self):
-        prompt = self.prompt_text.get("1.0", "end-1c").strip()
-        if not prompt: return
-        
-        self.status_lbl.configure(text="Generating...")
-        self.gen_btn.configure(state="disabled")
-        
-        provider = self.app_ref.app_settings.get("ai_provider", "Ollama (Local)")
-        key = self.app_ref.app_settings.get("ai_key", "http://localhost:11434").strip()
-        model = self.app_ref.app_settings.get("ai_model", "llama3:70b").strip()
-        
-        threading.Thread(target=self._ai_worker, args=(provider, key, model, prompt), daemon=True).start()
-        
-    def _ai_worker(self, provider, key, model, prompt):
-        import urllib.request
-        import json
-        
-        system_prompt = "You are a Macropad JSON Generator. Respond ONLY with a raw JSON array of action objects. Do NOT include markdown blocks like ```json. Do NOT include any explanations. Supported types: text, keycombo, delay, key, hold, release, media, mouse_click, mouse_move, led, led_anim, profile, telephony. Modifiers: LEFT_GUI, LEFT_CTRL, LEFT_ALT, LEFT_SHIFT, ENTER, ESC, TAB, SPACE, BACKSPACE. E.g. prompt: 'open notepad and type hi' -> [{\"type\": \"keycombo\", \"keys\": [\"LEFT_GUI\", \"R\"]}, {\"type\": \"delay\", \"ms\": 500}, {\"type\": \"text\", \"value\": \"notepad\"}, {\"type\": \"key\", \"value\": \"ENTER\"}, {\"type\": \"delay\", \"ms\": 500}, {\"type\": \"text\", \"value\": \"hi\"}]"
-        
-        try:
-            result_text = ""
-            if provider == "Ollama (Local)":
-                model_name = model if model else "llama3"
-                req = urllib.request.Request(f"{key}/api/generate", method="POST", headers={"Content-Type": "application/json"})
-                data = json.dumps({"model": model_name, "prompt": f"{system_prompt}\nUser Prompt: {prompt}", "stream": False}).encode("utf-8")
-                with urllib.request.urlopen(req, data=data, timeout=120) as response:
-                    res = json.loads(response.read().decode())
-                    result_text = res.get("response", "")
-                    
-            elif provider == "Gemini":
-                model_name = model if model else "gemini-1.5-flash"
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"
-                req = urllib.request.Request(url, method="POST", headers={"Content-Type": "application/json"})
-                data = json.dumps({
-                    "contents": [{"parts": [{"text": f"{system_prompt}\nUser Prompt: {prompt}"}]}]
-                }).encode("utf-8")
-                with urllib.request.urlopen(req, data=data, timeout=120) as response:
-                    res = json.loads(response.read().decode())
-                    result_text = res["candidates"][0]["content"]["parts"][0]["text"]
-                    
-            elif provider == "OpenAI":
-                model_name = model if model else "gpt-4o-mini"
-                req = urllib.request.Request("https://api.openai.com/v1/chat/completions", method="POST", headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"})
-                data = json.dumps({
-                    "model": model_name,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": prompt}
-                    ]
-                }).encode("utf-8")
-                with urllib.request.urlopen(req, data=data, timeout=120) as response:
-                    res = json.loads(response.read().decode())
-                    result_text = res["choices"][0]["message"]["content"]
-
-            result_text = result_text.strip()
-            if result_text.startswith("```json"): result_text = result_text[7:]
-            if result_text.startswith("```"): result_text = result_text[3:]
-            if result_text.endswith("```"): result_text = result_text[:-3]
+            if idx >= len(opts): idx = 0
+            self.index_map[knum] = idx
+            s = opts[idx]
             
-            actions = json.loads(result_text.strip())
-            if isinstance(actions, list):
-                self.after(0, self.on_success, actions)
-            else:
-                self.after(0, self.on_error, "AI did not return a valid array.")
+            desc_text = s.get('description', '')[:28]
+            if len(opts) > 1:
+                desc_text += f" ({idx+1}/{len(opts)})"
                 
-        except Exception as e:
-            self.after(0, self.on_error, str(e))
+            desc = ctk.CTkLabel(text_col, text=desc_text, anchor="w", font=ctk.CTkFont(size=12, weight="bold"), text_color="#cccccc")
+            desc.pack(side="top", anchor="w", pady=(5, 0))
             
-    def on_success(self, actions_list):
-        self.on_generate(actions_list)
-        self.destroy()
+            act_strs = []
+            for act in s.get("actions", []):
+                t = act.get("type", "")
+                if t == "keycombo": act_strs.append("+".join(act.get("keys", [])))
+                elif t == "text": act_strs.append(f"'{act.get('value', '')}'")
+                elif t in ["key", "hold", "release"]: act_strs.append(str(act.get("value", act.get("key", ""))))
+                elif t == "delay": act_strs.append(f"{act.get('ms', 0)}ms")
+                elif t == "media": act_strs.append(str(act.get("value", "")))
+                else: act_strs.append(t)
+            
+            macro_txt = " → ".join(act_strs) if act_strs else "Empty Array"
+            if len(macro_txt) > 30: macro_txt = macro_txt[:27] + "..."
+            
+            details = ctk.CTkLabel(text_col, text=macro_txt, anchor="w", font=ctk.CTkFont(family="Consolas", size=10), text_color="#858585")
+            details.pack(side="top", anchor="w", pady=(0, 4))
+            
+            self.app_ref.push_shortcut_to_device(s)
 
-    def on_error(self, err_msg):
-        self.status_lbl.configure(text=f"Error: {err_msg}", text_color="red")
-        self.gen_btn.configure(state="normal")
+        controls = ctk.CTkFrame(row, fg_color="transparent")
+        controls.pack(side="right", fill="y", padx=2)
+        
+        regen_btn = ctk.CTkButton(controls, text="⟳", width=22, height=22, corner_radius=2, fg_color="transparent", hover_color="#37373d", text_color="#aaaaaa")
+        regen_btn.configure(command=lambda k=knum: self.request_regen(k))
+        regen_btn.pack(side="left", padx=1, pady=15)
+        
+        arrows_frame = ctk.CTkFrame(controls, fg_color="transparent")
+        arrows_frame.pack(side="left", padx=1)
+        
+        up_btn = ctk.CTkButton(arrows_frame, text="▲", width=22, height=18, corner_radius=0, fg_color="transparent", hover_color="#37373d", font=ctk.CTkFont(size=10), text_color="#888888")
+        up_btn.configure(command=lambda k=knum: self.cycle_option(k, -1))
+        up_btn.pack(side="top", pady=(5,0))
+        
+        dn_btn = ctk.CTkButton(arrows_frame, text="▼", width=22, height=18, corner_radius=0, fg_color="transparent", hover_color="#37373d", font=ctk.CTkFont(size=10), text_color="#888888")
+        dn_btn.configure(command=lambda k=knum: self.cycle_option(k, 1))
+        dn_btn.pack(side="bottom", pady=(0,5))
+
+    def cycle_option(self, knum, direction):
+        if len(self.options_map[knum]) <= 1: return
+        self.index_map[knum] = (self.index_map[knum] + direction) % len(self.options_map[knum])
+        self.update_context(self.current_context, self.app_ref.templates_mgr.get_context_shortcuts(self.current_context), False)
+
+    def request_regen(self, knum):
+        self.app_ref.ai_queue.queue.put({
+            "action": "generate_and_validate",
+            "context": self.current_context,
+            "key_num": knum
+        })
+        self.app_ref.append_tracking_log(f"Queued regeneration for key {knum} in {self.current_context}\n")
 
 class ActionEditorRow(ctk.CTkFrame):
     def __init__(self, master, action_dict, on_delete, on_change, *args, **kwargs):
@@ -435,33 +619,18 @@ class ActionEditorRow(ctk.CTkFrame):
         elif t == "media":
             self.value_combo.configure(values=["PLAY_PAUSE", "STOP", "NEXT", "PREVIOUS", "MUTE", "VOLUME_UP", "VOLUME_DOWN"], state="readonly")
             self.value_combo.grid(row=0, column=0, sticky="ew")
-            if self.value_var.get() not in self.value_combo.cget("values"):
-                self.value_var.set("PLAY_PAUSE")
-                self.value_changed()
         elif t == "mouse_click":
             self.value_combo.configure(values=["LEFT", "RIGHT", "MIDDLE"], state="readonly")
             self.value_combo.grid(row=0, column=0, sticky="ew")
-            if self.value_var.get() not in self.value_combo.cget("values"):
-                self.value_var.set("LEFT")
-                self.value_changed()
         elif t == "profile":
             self.value_combo.configure(values=["1", "2", "3"], state="readonly")
             self.value_combo.grid(row=0, column=0, sticky="ew")
-            if self.value_var.get() not in self.value_combo.cget("values"):
-                self.value_var.set("1")
-                self.value_changed()
         elif t == "telephony":
             self.value_combo.configure(values=["MIC_MUTE", "ANSWER", "DECLINE"], state="readonly")
             self.value_combo.grid(row=0, column=0, sticky="ew")
-            if self.value_var.get() not in self.value_combo.cget("values"):
-                self.value_var.set("MIC_MUTE")
-                self.value_changed()
         elif t == "led_anim":
             self.value_combo.configure(values=["flash", "breathe", "none"], state="readonly")
             self.value_combo.grid(row=0, column=0, sticky="ew")
-            if self.value_var.get() not in self.value_combo.cget("values"):
-                self.value_var.set("flash")
-                self.value_changed()
         elif t in ["key", "hold", "release"]:
             common_keys = [
                 "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
@@ -545,10 +714,10 @@ class ActionEditorRow(ctk.CTkFrame):
         self.on_delete(self)
 
 
-class MacropadV3App(ctk.CTk):
+class MacropadV4App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Macropad Configurator V3")
+        self.title("Macropad Configurator V4")
         self.geometry("1200x800")
 
         self.serial_port = None
@@ -561,22 +730,26 @@ class MacropadV3App(ctk.CTk):
         self.action_rows = []
 
         self.profile_data = self.create_empty_profile()
-        self.auto_switch_rules = {"code": 2, "photoshop": 3}
-        self.auto_switch_enabled = ctk.BooleanVar(value=False)
-        self.app_settings = {"ai_provider": "Ollama (Local)", "ai_key": "http://localhost:11434", "ai_model": "llama3:70b"}
+        self.auto_switch_enabled = ctk.BooleanVar(value=True)
+        self.app_settings = {"ai_provider": "Ollama (Local)", "ai_key": "http://localhost:11434", "ai_model": "llama3:70b", "widget_alpha": 0.98}
         self.load_app_settings()
+        
+        self.templates_mgr = TemplatesManager()
+        self.ai_queue = AIQueueManager(self)
+        self.current_context = None
 
-        # Tab Layout
         self.tabview = ctk.CTkTabview(self)
         self.tabview.pack(fill="both", expand=True, padx=10, pady=10)
 
         self.tab_dashboard = self.tabview.add("Dashboard")
         self.tab_editor = self.tabview.add("Key Editor")
         self.tab_autoswitch = self.tabview.add("Auto-Switcher")
+        self.tab_settings = self.tabview.add("Settings")
 
         self.setup_dashboard()
         self.setup_editor()
         self.setup_autoswitch()
+        self.setup_settings()
 
         self.rec_widget = RecommendationWidget(self)
         self.rec_widget.withdraw()
@@ -606,7 +779,6 @@ class MacropadV3App(ctk.CTk):
         }
 
     def setup_dashboard(self):
-        # Dashboard layout: Left config/sync panel, Right logging panel
         self.tab_dashboard.grid_columnconfigure(1, weight=1)
         self.tab_dashboard.grid_rowconfigure(0, weight=1)
 
@@ -616,7 +788,6 @@ class MacropadV3App(ctk.CTk):
         log_frame = ctk.CTkFrame(self.tab_dashboard)
         log_frame.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
 
-        # --- Connection Box ---
         conn_box = ctk.CTkFrame(left_side)
         conn_box.pack(fill="x", padx=10, pady=10)
         ctk.CTkLabel(conn_box, text="Device Connection", font=ctk.CTkFont(weight="bold")).pack(pady=5)
@@ -629,7 +800,6 @@ class MacropadV3App(ctk.CTk):
         self.connect_btn = ctk.CTkButton(conn_box, text="Connect", command=self.toggle_connection, fg_color="green", hover_color="darkgreen")
         self.connect_btn.pack(padx=10, pady=10)
         
-        # --- File Management Box ---
         file_box = ctk.CTkFrame(left_side)
         file_box.pack(fill="x", padx=10, pady=10)
         ctk.CTkLabel(file_box, text="Sync Profiles", font=ctk.CTkFont(weight="bold")).pack(pady=5)
@@ -644,14 +814,12 @@ class MacropadV3App(ctk.CTk):
         self.set_active_btn = ctk.CTkButton(file_box, text="Set Active", command=self.set_active_profile, state="disabled")
         self.set_active_btn.pack(padx=10, pady=5)
 
-        # Storage Info
         self.storage_lbl = ctk.CTkLabel(file_box, text="Storage: Unknown", font=ctk.CTkFont(size=11))
         self.storage_lbl.pack(padx=10, pady=(10, 0))
         self.storage_bar = ctk.CTkProgressBar(file_box, height=10)
         self.storage_bar.pack(padx=10, pady=(0, 10), fill="x")
         self.storage_bar.set(0)
 
-        # --- Global Settings ---
         set_box = ctk.CTkFrame(left_side)
         set_box.pack(fill="x", padx=10, pady=10)
         ctk.CTkLabel(set_box, text="Profile Global Settings", font=ctk.CTkFont(weight="bold")).pack(pady=5)
@@ -682,7 +850,6 @@ class MacropadV3App(ctk.CTk):
         ctk.CTkButton(local_btn_frame, text="Import Disk", width=100, command=self.import_disk).pack(side="left", padx=5)
         ctk.CTkButton(local_btn_frame, text="Export Disk", width=100, command=self.export_disk).pack(side="right", padx=5)
 
-        # Logging View
         log_frame.grid_columnconfigure(0, weight=1)
         log_frame.grid_rowconfigure(0, weight=1)
         self.console = ctk.CTkTextbox(log_frame, font=ctk.CTkFont(family="Consolas", size=12), text_color="lightgreen", state="disabled")
@@ -692,7 +859,6 @@ class MacropadV3App(ctk.CTk):
         self.tab_editor.grid_columnconfigure(1, weight=1)
         self.tab_editor.grid_rowconfigure(0, weight=1)
 
-        # Keyboard Mapping
         self.kb_frame = ctk.CTkFrame(self.tab_editor, width=250)
         self.kb_frame.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         
@@ -718,7 +884,6 @@ class MacropadV3App(ctk.CTk):
                     btn.grid(row=r, column=c, padx=5, pady=5)
                     self.key_buttons[key_id] = btn
 
-        # Actions Editor
         self.action_area = ctk.CTkFrame(self.tab_editor)
         self.action_area.grid(row=0, column=1, sticky="nsew", padx=10, pady=10)
         self.action_area.grid_columnconfigure(0, weight=1)
@@ -734,7 +899,6 @@ class MacropadV3App(ctk.CTk):
         btn_frame = ctk.CTkFrame(header, fg_color="transparent")
         btn_frame.grid(row=0, column=1, sticky="e")
         
-        ctk.CTkButton(btn_frame, text="✨ AI", width=50, fg_color="purple", hover_color="darkmagenta", command=self.open_ai_generator).pack(side="left", padx=5)
         ctk.CTkButton(btn_frame, text="+ Add", width=80, command=self.add_action).pack(side="left")
         
         self.action_scroll = ctk.CTkScrollableFrame(self.action_area)
@@ -747,12 +911,22 @@ class MacropadV3App(ctk.CTk):
         self.tab_autoswitch.grid_rowconfigure(2, weight=1)
         
         ctk.CTkLabel(self.tab_autoswitch, text="Auto Switcher Tracking", font=ctk.CTkFont(size=16, weight="bold")).grid(row=0, column=0, pady=10)
-        ctk.CTkCheckBox(self.tab_autoswitch, text="Enable Background Auto-Switching", variable=self.auto_switch_enabled).grid(row=1, column=0, pady=10)
+        
+        controls_frame = ctk.CTkFrame(self.tab_autoswitch, fg_color="transparent")
+        controls_frame.grid(row=1, column=0, pady=5)
+        
+        ctk.CTkCheckBox(controls_frame, text="Enable Background Auto-Switching", variable=self.auto_switch_enabled).pack(side="left", padx=10)
+        self.ai_debug_enabled = ctk.BooleanVar(value=False)
+        ctk.CTkCheckBox(controls_frame, text="Debug AI Payload", variable=self.ai_debug_enabled).pack(side="left", padx=10)
         
         self.tracking_console = ctk.CTkTextbox(self.tab_autoswitch, font=ctk.CTkFont(family="Consolas", size=12), text_color="cyan", state="disabled")
         self.tracking_console.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
-        
-        ctk.CTkLabel(self.tab_autoswitch, text="Active Context rules: code -> v2, photoshop -> v3 (expand later).", font=ctk.CTkFont(size=12, slant="italic")).grid(row=3, column=0, pady=10)
+
+    def setup_settings(self):
+        self.tab_settings.grid_columnconfigure(1, weight=1)
+        ctk.CTkLabel(self.tab_settings, text="Application Settings", font=ctk.CTkFont(size=18, weight="bold")).grid(row=0, column=0, columnspan=2, pady=10)
+        ctk.CTkButton(self.tab_settings, text="AI Configuration", command=lambda: AISettingsPopup(self)).grid(row=1, column=0, padx=20, pady=10, sticky="w")
+        ctk.CTkButton(self.tab_settings, text="Widget Appearance", command=lambda: WidgetSettingsPopup(self)).grid(row=2, column=0, padx=20, pady=10, sticky="w")
 
     def append_tracking_log(self, text):
         self.tracking_console.configure(state="normal")
@@ -760,27 +934,12 @@ class MacropadV3App(ctk.CTk):
         self.tracking_console.see("end")
         self.tracking_console.configure(state="disabled")
 
-    # --- Utility Methods ---
     def update_global_setting(self, key, val):
         self.profile_data[key] = val
         
     def update_global_int(self, key, val):
         try: self.profile_data[key] = int(val)
         except: pass
-
-    # --- Key Selection & Actions ---
-    def open_ai_generator(self):
-        kdata = self.get_key_data(self.selected_key_id)
-        AIGeneratorPopup(self, kdata.get("actions", []), self.on_ai_generated)
-        
-    def on_ai_generated(self, new_actions_list):
-        kdata = self.get_key_data(self.selected_key_id)
-        # Append new AI actions to existing rather than replacing everything
-        if "actions" not in kdata:
-            kdata["actions"] = []
-        kdata["actions"].extend(new_actions_list)
-        self.refresh_action_editor()
-        self.sync_ui_to_data()
 
     def select_key(self, key_id):
         self.selected_key_id = key_id
@@ -827,7 +986,7 @@ class MacropadV3App(ctk.CTk):
         self.action_rows.remove(row_obj)
         
     def on_action_change(self):
-        pass # The object references change directly so no rebuild needed
+        pass
 
     def sync_ui_to_data(self):
         self.prof_name_var.set(self.profile_data.get("profile_name", "Unknown"))
@@ -840,7 +999,6 @@ class MacropadV3App(ctk.CTk):
                 self.profile_data["keys"].append({"id": i, "actions": []})
         self.refresh_action_editor()
 
-    # --- Disk I/O ---
     def import_disk(self):
         f = filedialog.askopenfilename(filetypes=[("JSON Files", "*.json")])
         if f:
@@ -862,138 +1020,93 @@ class MacropadV3App(ctk.CTk):
             except Exception as e:
                 messagebox.showerror("Export Error", str(e))
 
-    # --- Auto-Switch Engine ---
+    def detect_context(self, title):
+        title_lower = title.lower()
+        if "visual studio code" in title_lower or "vscode" in title_lower:
+            if "terminal" in title_lower or "bash" in title_lower or "powershell" in title_lower or "cmd" in title_lower:
+                return "vscode_terminal"
+            return "vscode"
+        if "excel" in title_lower: return "excel"
+        if "sheets" in title_lower or "google sheets" in title_lower: return "google_sheets"
+        if "powershell" in title_lower: return "powershell"
+        if "ubuntu" in title_lower or "wsl" in title_lower or "debian" in title_lower: return "wsl"
+        if "chrome" in title_lower: return "chrome"
+        if "notepad" in title_lower: return "notepad"
+        if "slack" in title_lower: return "slack"
+        
+        parts = title.split("-")
+        return parts[-1].strip() if len(parts) > 1 else title.strip()
+
     def auto_switch_loop(self):
-        last_app = ""
+        last_context = ""
         while not self.stop_event.is_set():
-            if self.auto_switch_enabled.get():
-                try:
+            try:
+                is_enabled = False
+                try: is_enabled = self.auto_switch_enabled.get()
+                except: pass
+                
+                if is_enabled:
                     import pygetwindow as gw
                     win = gw.getActiveWindow()
                     if win and win.title:
                         title = win.title.replace('\u200b', '').strip()
-                        app_name = ""
-                        try:
-                            import ctypes, psutil
-                            hwnd = ctypes.windll.user32.GetForegroundWindow()
-                            pid = ctypes.c_ulong()
-                            ctypes.windll.user32.GetWindowThreadProcessId(hwnd, ctypes.byref(pid))
-                            proc = psutil.Process(pid.value)
-                            app_name = proc.name().replace(".exe", "").title()
-                        except:
-                            parts = title.split(" - ")
-                            app_name = parts[-1].strip() if len(parts) > 1 else title
+                        context = self.detect_context(title)
                         
-                        if app_name and app_name != last_app and "Macropad" not in app_name:
-                            last_app = app_name
-                            self.after(0, self.append_tracking_log, f"Context Changed -> [{app_name}]\n")
-                            self.handle_context_change(app_name)
-                except Exception as e:
-                    pass
+                        if context and context != last_context and "Macropad" not in context:
+                            last_context = context
+                            self.current_context = context
+                            self.after(0, self.append_tracking_log, f"Context Changed -> [{context}]\n")
+                            self.after(0, lambda c=context: self.handle_context_change(c))
+            except Exception as e:
+                pass
             import time
             time.sleep(1.0)
             
-    def handle_context_change(self, app_name):
-        import macropad_db # Local db wrapper
-        
+    def handle_context_change(self, context):
         def reset_to_default():
-            if self.serial_port and self.serial_port.is_open:
-                p_num = self.profile_var.get().replace("profile", "").replace(".json", "")
-                if p_num.isdigit():
-                    self.send_cmd(f"setprofile {p_num}")
+            try:
+                if self.serial_port and self.serial_port.is_open:
+                    p_num = self.profile_var.get().replace("profile", "").replace(".json", "")
+                    if p_num.isdigit():
+                        self.send_cmd(f"setprofile {p_num}")
+            except: pass
 
-        if not app_name or app_name.lower() in ["program manager", "windows explorer", "task Switching"]:
-            self.after(0, self.rec_widget.withdraw)
+        if not context or context.lower() in ["program manager", "windows explorer", "task switching"]:
+            try: self.rec_widget.withdraw()
+            except: pass
             reset_to_default()
             return
 
-        shortcuts = macropad_db.get_app_shortcuts(app_name)
-        
-        if self.rec_widget.winfo_exists() and self.auto_switch_enabled.get():
-            self.after(0, self.rec_widget.deiconify)
-            
-        if shortcuts and len(shortcuts) > 0:
-            self.after(0, self.rec_widget.update_context, app_name, shortcuts, False)
-            self.push_shortcuts_to_device(shortcuts)
-        else:
-            if not hasattr(self, 'generating_apps'):
-                self.generating_apps = set()
-                
-            if app_name in self.generating_apps:
-                self.after(0, self.rec_widget.update_context, app_name, None, True)
-                reset_to_default()
-                return
-                
-            self.generating_apps.add(app_name)
-            self.after(0, self.rec_widget.update_context, app_name, None, True)
-            reset_to_default()
-            provider = self.app_settings.get("ai_provider", "Ollama (Local)")
-            key = self.app_settings.get("ai_key", "http://localhost:11434").strip()
-            model = self.app_settings.get("ai_model", "llama3:70b").strip()
-            threading.Thread(target=self._ai_context_worker, args=(provider, key, model, app_name), daemon=True).start()
-
-    def push_shortcuts_to_device(self, shortcuts):
-        if not self.serial_port or not self.serial_port.is_open: return
-        import json
-        for s in shortcuts:
-            knum = s.get("key_num")
-            acts = s.get("actions", [])
-            if knum and 1 <= knum <= 4:
-                self.send_cmd(f"setkey {knum} {json.dumps(acts)}")
-
-    def _ai_context_worker(self, provider, key, model, app_name):
-        import urllib.request
-        import json
-        import macropad_db
-        
-        system_prompt = "You are a PC Shortcut Generator. Respond ONLY with a raw JSON array of max 4 objects. No markdown blocks. Format: [{\"key_num\": 1, \"description\": \"Save File\", \"actions\": [{\"type\":\"keycombo\",\"keys\":[\"LEFT_CTRL\",\"S\"]}]}, ... up to key_num 4]"
-        prompt = f"App Context: {app_name}. Give me the 4 best general productivity keyboard shortcuts for this app."
+        shortcuts = self.templates_mgr.get_context_shortcuts(context)
         
         try:
-            result_text = ""
-            if provider == "Ollama (Local)":
-                model_name = model if model else "llama3"
-                req = urllib.request.Request(f"{key}/api/generate", method="POST", headers={"Content-Type": "application/json"})
-                data = json.dumps({"model": model_name, "prompt": f"{system_prompt}\nUser Prompt: {prompt}", "stream": False}).encode("utf-8")
-                with urllib.request.urlopen(req, data=data, timeout=120) as response:
-                    res = json.loads(response.read().decode())
-                    result_text = res.get("response", "")
-            elif provider == "Gemini":
-                model_name = model if model else "gemini-1.5-flash"
-                url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={key}"
-                req = urllib.request.Request(url, method="POST", headers={"Content-Type": "application/json"})
-                data = json.dumps({"contents": [{"parts": [{"text": f"{system_prompt}\nUser Prompt: {prompt}"}]}]}).encode("utf-8")
-                with urllib.request.urlopen(req, data=data, timeout=120) as response:
-                    res = json.loads(response.read().decode())
-                    result_text = res["candidates"][0]["content"]["parts"][0]["text"]
-            elif provider == "OpenAI":
-                model_name = model if model else "gpt-4o-mini"
-                req = urllib.request.Request("https://api.openai.com/v1/chat/completions", method="POST", headers={"Content-Type": "application/json", "Authorization": f"Bearer {key}"})
-                data = json.dumps({"model": model_name, "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": prompt}]}).encode("utf-8")
-                with urllib.request.urlopen(req, data=data, timeout=120) as response:
-                    res = json.loads(response.read().decode())
-                    result_text = res["choices"][0]["message"]["content"]
-
-            result_text = result_text.strip()
-            if result_text.startswith("```json"): result_text = result_text[7:]
-            if result_text.startswith("```"): result_text = result_text[3:]
-            if result_text.endswith("```"): result_text = result_text[:-3]
+            if self.rec_widget.winfo_exists() and self.auto_switch_enabled.get():
+                self.rec_widget.deiconify()
+        except: pass
             
-            parsed = json.loads(result_text.strip())
-            if isinstance(parsed, list) and len(parsed) > 0:
-                macropad_db.save_app_shortcuts(app_name, parsed)
-                self.after(0, self.rec_widget.update_context, app_name, parsed, False)
-                self.push_shortcuts_to_device(parsed)
-            else:
-                self.after(0, self.rec_widget.update_context, app_name, [], False)
-                
-        except Exception as e:
-            self.after(0, self.append_tracking_log, f"AI Error for {app_name}: {str(e)}\n")
-        finally:
-            if hasattr(self, 'generating_apps') and app_name in self.generating_apps:
-                self.generating_apps.remove(app_name)
+        if shortcuts and len(shortcuts) > 0:
+            try: self.rec_widget.update_context(context, shortcuts, False)
+            except: pass
+            self.ai_queue.queue.put({
+                "action": "generate_and_validate",
+                "context": context
+            })
+        else:
+            try: self.rec_widget.update_context(context, None, True)
+            except: pass
+            reset_to_default()
+            self.ai_queue.queue.put({
+                "action": "generate_and_validate",
+                "context": context
+            })
 
-    # --- Serial Control ---
+    def push_shortcut_to_device(self, shortcut):
+        if not self.serial_port or not self.serial_port.is_open: return
+        knum = shortcut.get("key_num")
+        acts = shortcut.get("actions", [])
+        if knum and 1 <= knum <= 4:
+            self.send_cmd(f"setkey {knum} {json.dumps(acts)}")
+
     def get_ports(self):
         ports = serial.tools.list_ports.comports()
         return [port.device for port in ports] if ports else ["No Ports Found"]
@@ -1158,7 +1271,6 @@ class MacropadV3App(ctk.CTk):
 
     def set_active_profile(self):
         target = self.profile_var.get()
-        import re
         match = re.search(r'profile(\d+)', target)
         if match:
             num = match.group(1)
@@ -1168,5 +1280,5 @@ class MacropadV3App(ctk.CTk):
             self.append_console("Could not determine profile number.\n")
 
 if __name__ == "__main__":
-    app = MacropadV3App()
+    app = MacropadV4App()
     app.mainloop()

@@ -572,6 +572,26 @@ void cliHandleLine(const String &line) {
     int id = arg.toInt();
     if (id < 1 || id > NUM_PROFILES) Serial.println("invalid");
     else { loadProfile(id); Serial.printf("profile %d\n", id); }
+  } else if (cmd == "setkey") {
+    int sp2 = arg.indexOf(' ');
+    if (sp2 != -1) {
+      int keyId = arg.substring(0, sp2).toInt();
+      String jsonArr = arg.substring(sp2 + 1);
+      if (!profileDoc.containsKey("keys")) profileDoc.createNestedArray("keys");
+      JsonArray keysArr = profileDoc["keys"].as<JsonArray>();
+      for (int i=0; i < keysArr.size(); i++) {
+          JsonObject ko = keysArr[i].as<JsonObject>();
+          if ((ko["id"] | 0) == keyId) { keysArr.remove(i); break; }
+      }
+      profileDoc.garbageCollect();
+      JsonObject newKo = keysArr.createNestedObject();
+      newKo["id"] = keyId;
+      StaticJsonDocument<2048> tempDoc;
+      if (!deserializeJson(tempDoc, jsonArr)) {
+          newKo["actions"] = tempDoc.as<JsonArray>();
+          Serial.printf("Key %d updated in RAM\n", keyId);
+      } else { Serial.println("setkey JSON parse failed"); }
+    }
   } else if (cmd == "status") Serial.printf("Profile:%d loaded:%d idle:%d\n", currentProfile, profileLoaded, idleAnimation);
   else if (cmd == "reboot") { Serial.println("rebooting"); delay(200); ESP.restart(); }
   else Serial.println("unknown");

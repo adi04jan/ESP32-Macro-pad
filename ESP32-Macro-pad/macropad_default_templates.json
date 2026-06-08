@@ -1,0 +1,2421 @@
+{
+    "vscode": [
+        {
+            "key_num": 1,
+            "description": "Command Palette",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "P"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Toggle Terminal",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "TILDE"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Format Document",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_SHIFT",
+                        "LEFT_ALT",
+                        "F"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Go to Definition",
+            "actions": [
+                {
+                    "type": "key",
+                    "value": "F12"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Find in Files",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "F"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Toggle Line Comment",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "SLASH"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Close Editor",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "W"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Next Editor",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "PAGEDOWN"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Previous Editor",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "PAGEUP"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Split Editor",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "BACKSLASH"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Reopen Closed Editor",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "T"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Peek Definition",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "F12"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Rename Symbol",
+            "actions": [
+                {
+                    "type": "key",
+                    "value": "F2"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Go to Line",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "G"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Quick Open",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "P"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Copy Line Down",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_SHIFT",
+                        "LEFT_ALT",
+                        "DOWN_ARROW"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Move Line Up",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "UP_ARROW"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Move Line Down",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "DOWN_ARROW"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Toggle Word Wrap",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "Z"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Save All",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "K"
+                    ]
+                },
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "S"
+                    ]
+                }
+            ]
+        }
+    ],
+    "vscode_terminal": [
+        {
+            "key_num": 1,
+            "description": "Clear Terminal",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "L"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Git Status",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git status"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Git Add All",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git add ."
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Git Commit",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git commit -m \"update\""
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Git Push",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git push"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Git Pull",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git pull"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Exit Terminal",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "exit"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "New Terminal",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "TILDE"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Kill Terminal",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "C"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "NPM Install",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "npm install"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "NPM Start",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "npm start"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "CD ..",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "cd .."
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "List Files",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "ls -la"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Git Branch",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git branch"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Git Checkout",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git checkout "
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Git Log",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git log --oneline"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Python Venv",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "python -m venv venv"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Activate Venv",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": ".\\venv\\Scripts\\activate"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Pip Freeze",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "pip freeze > req.txt"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Split Terminal",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "5"
+                    ]
+                }
+            ]
+        }
+    ],
+    "excel": [
+        {
+            "key_num": 1,
+            "description": "Save",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "S"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Bold",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "B"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "AutoSum",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "EQUAL"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Filter",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "L"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Copy",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "C"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Paste",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "V"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Paste Values",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "V"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Insert Row",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "EQUAL"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Delete Row",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "MINUS"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Select Row",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_SHIFT",
+                        "SPACE"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Select Column",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "SPACE"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Format Cells",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "1"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "New Sheet",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_SHIFT",
+                        "F11"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Next Sheet",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "PAGEDOWN"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Prev Sheet",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "PAGEUP"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Find",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "F"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Replace",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "H"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Select All",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "A"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Undo",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "Z"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Redo",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "Y"
+                    ]
+                }
+            ]
+        }
+    ],
+    "google_sheets": [
+        {
+            "key_num": 1,
+            "description": "Insert Row Above",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_ALT",
+                        "EQUAL"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Delete Row",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_ALT",
+                        "MINUS"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Bold",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "B"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Italic",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "I"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Clear Formatting",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "BACKSLASH"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Paste Values",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "V"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Select Row",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_SHIFT",
+                        "SPACE"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Select Column",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "SPACE"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Align Center",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "E"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Insert Link",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "K"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Comment",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_ALT",
+                        "M"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Find",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "F"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Replace",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "H"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Next Sheet",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "PAGEDOWN"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Prev Sheet",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "PAGEUP"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Select All",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "A"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Undo",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "Z"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Redo",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "Y"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Zoom In",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "EQUAL"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Zoom Out",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "MINUS"
+                    ]
+                }
+            ]
+        }
+    ],
+    "chrome": [
+        {
+            "key_num": 1,
+            "description": "New Tab",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "T"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Close Tab",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "W"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Reopen Tab",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "T"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Dev Tools",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "I"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Refresh",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "R"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Hard Refresh",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "R"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Find",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "F"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Next Tab",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "TAB"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Prev Tab",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "TAB"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "History",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "H"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Downloads",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "J"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Bookmarks",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "O"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Print",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "P"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Zoom In",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "EQUAL"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Zoom Out",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "MINUS"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Reset Zoom",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "0"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Focus Address",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "L"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Incognito",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "N"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Clear Browsing",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "DELETE"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Inspect Element",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "C"
+                    ]
+                }
+            ]
+        }
+    ],
+    "powershell": [
+        {
+            "key_num": 1,
+            "description": "List Directory",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "ls"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Clear Screen",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "clear"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Ping Google",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "ping 8.8.8.8"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Exit",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "exit"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Stop Process",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "C"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "CD ..",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "cd .."
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Get Process",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "Get-Process"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Get Service",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "Get-Service"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "IP Config",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "ipconfig"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "System Info",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "systeminfo"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Check Disk",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "chkdsk"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Tasklist",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "tasklist"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Netstat",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "netstat -an"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Trace Route",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "tracert 8.8.8.8"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Flush DNS",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "ipconfig /flushdns"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "History",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "history"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Tree",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "tree"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Date",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "date"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Path",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "$env:Path"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Clear History",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "Clear-History"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        }
+    ],
+    "wsl": [
+        {
+            "key_num": 1,
+            "description": "List All",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "ls -la"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Clear Screen",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "L"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Top Processes",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "htop"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Update Apt",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "sudo apt update"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Upgrade Apt",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "sudo apt upgrade -y"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "PWD",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "pwd"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "CD Root",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "cd /"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "CD Home",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "cd ~"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Git Status",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git status"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Git Pull",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git pull"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Make",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "make -j4"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Exit",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "exit"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Find File",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "find . -name \"\""
+                },
+                {
+                    "type": "key",
+                    "value": "LEFT_ARROW"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Grep",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "grep -rnw . -e \"\""
+                },
+                {
+                    "type": "key",
+                    "value": "LEFT_ARROW"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Tar Extract",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "tar -xvf "
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Chmod +x",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "chmod +x "
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "DF -h",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "df -h"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Free -m",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "free -m"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Kill",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "kill -9 "
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "History",
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "history"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
+                }
+            ]
+        }
+    ],
+    "notepad": [
+        {
+            "key_num": 1,
+            "description": "Save",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "S"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Save As",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "S"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Find",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "F"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Replace",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "H"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Select All",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "A"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Copy",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "C"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Paste",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "V"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Cut",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "X"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Undo",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "Z"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Redo",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "Y"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "New File",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "N"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Open File",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "O"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Print",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "P"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Close",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "W"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Zoom In",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "EQUAL"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Zoom Out",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "MINUS"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Delete",
+            "actions": [
+                {
+                    "type": "key",
+                    "value": "DELETE"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Go To",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "G"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Time/Date",
+            "actions": [
+                {
+                    "type": "key",
+                    "value": "F5"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Word Wrap",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "Z"
+                    ]
+                }
+            ]
+        }
+    ],
+    "slack": [
+        {
+            "key_num": 1,
+            "description": "Quick Switcher",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "K"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "All Unreads",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "A"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Go Back",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "LEFT_ARROW"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Go Forward",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "RIGHT_ARROW"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Search",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "G"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Mentions",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "M"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Saved Items",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "S"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Set Status",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "Y"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Preferences",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "COMMA"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Open Threads",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "T"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Close Sidebar",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "DOT"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Next Channel",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "DOWN_ARROW"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Prev Channel",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_ALT",
+                        "UP_ARROW"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "Upload File",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "U"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Snippet",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "ENTER"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Start Call",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "C"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 1,
+            "description": "Edit Last",
+            "actions": [
+                {
+                    "type": "key",
+                    "value": "UP_ARROW"
+                }
+            ]
+        },
+        {
+            "key_num": 2,
+            "description": "React",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "BACKSLASH"
+                    ]
+                }
+            ]
+        },
+        {
+            "key_num": 3,
+            "description": "Mark Read",
+            "actions": [
+                {
+                    "type": "key",
+                    "value": "ESC"
+                }
+            ]
+        },
+        {
+            "key_num": 4,
+            "description": "Toggle Mute",
+            "actions": [
+                {
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "LEFT_SHIFT",
+                        "SPACE"
+                    ]
+                }
+            ]
+        }
+    ]
+}

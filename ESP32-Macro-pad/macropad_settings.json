@@ -1,0 +1,6 @@
+{
+  "ai_provider": "Ollama (Local)",
+  "ai_key": "http://182.70.243.19:1112/",
+  "ai_model": "gemma4:latest",
+  "widget_alpha": 0.784
+}
