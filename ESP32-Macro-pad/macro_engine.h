@@ -11,7 +11,7 @@
 
 class MacroEngine {
  public:
-  void startKey(int keyId, int ledIndex);
+  void startKey(int keyId);
   void tick();
   void abort();
   bool isRunning() const { return running; }
@@ -27,7 +27,6 @@ class MacroEngine {
   Frame stack[MACRO_MAX_DEPTH];
   int depth = 0;
   unsigned long waitUntil = 0;
-  int ledIndex = -1;
   int defaultDelay = 30;
 
   // Streamed text typing.

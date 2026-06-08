@@ -51,11 +51,14 @@ void scanKeys() {
     keyState[i] = raw;
     keyLastChange[i] = millis();
     if (raw) {  // pressed
+      ledsKeyDown(i);                  // smooth highlight on the pressed key
       if (macroEngine.isRunning()) {
         macroEngine.abort();           // a new press cancels a running macro
       } else {
-        macroEngine.startKey(i + 1, i);
+        macroEngine.startKey(i + 1);
       }
+    } else {                           // released
+      ledsKeyUp(i);                    // highlight fades out
     }
   }
 }
@@ -83,7 +86,7 @@ void scanTouch() {
     int np = currentProfile + 1;
     if (np > NUM_PROFILES) np = 1;
     loadProfile(np);
-    flashAll(0, 0, 200, 1, 120, 60);
+    ledsFlash(0, 0, 200);
     touchDebounceA = millis();
   }
   if (b && !lastB && millis() - touchDebounceB > TOUCH_DEBOUNCE_MS) {
@@ -91,7 +94,7 @@ void scanTouch() {
     int np = currentProfile - 1;
     if (np < 1) np = NUM_PROFILES;
     loadProfile(np);
-    flashAll(0, 200, 0, 1, 120, 60);
+    ledsFlash(0, 200, 0);
     touchDebounceB = millis();
   }
 
@@ -101,7 +104,7 @@ void scanTouch() {
     if (millis() - bothStart > 3000) {
       macroEngine.abort();
       profileLoaded = false;
-      flashAll(255, 0, 0, 3, 120, 80);
+      ledsFlash(255, 0, 0);
       bothStart = 0;
     }
   } else {

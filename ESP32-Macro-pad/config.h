@@ -49,6 +49,17 @@
 #define SERIAL_UPLOAD_MAX        16384   // cap recorded JSON upload size (bytes)
 #define SERIAL_UPLOAD_TIMEOUT_MS 5000    // abort an upload stalled this long
 
+// ----- LED engine (frame-based, non-blocking) -----
+#define LED_BRIGHTNESS        80     // global NeoPixel brightness (0-255)
+#define LED_FRAME_MS          16     // ~60 FPS render cadence
+#define LED_EASE              0.22f  // per-frame easing of colour toward target
+#define LED_PRESS_RISE        1.0f   // press highlight rises instantly to full
+#define LED_PRESS_FADE        0.12f  // per-frame fade of a released key's highlight
+#define LED_FLASH_FADE        0.07f  // per-frame fade of a global flash pulse
+#define LED_BREATHE_SPEED     0.05f  // radians/frame for the sine breathe envelope
+#define LED_BREATHE_FLOOR     0.12f  // breathe never dims fully to black
+#define LED_RAINBOW_SPEED     2      // hue units/frame for the rainbow sweep
+
 // ----- Touch -----
 #define TOUCH_THRESHOLD       300    // delta over baseline that counts as a press
 #define TOUCH_DEBOUNCE_MS     300

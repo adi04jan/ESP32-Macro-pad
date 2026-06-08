@@ -6,7 +6,7 @@
 
 MacroEngine macroEngine;
 
-void MacroEngine::startKey(int keyId, int led) {
+void MacroEngine::startKey(int keyId) {
   if (!profileLoaded) return;
   JsonArray keys = profileDoc["keys"].as<JsonArray>();
   if (keys.isNull()) return;
@@ -27,9 +27,7 @@ void MacroEngine::startKey(int keyId, int led) {
     inText = false;
     textPos = 0;
     defaultDelay = profileDoc["default_delay"] | 30;
-    ledIndex = led;
     running = true;
-    setKeyLed(ledIndex, 255, 255, 255);
     return;
   }
 }
@@ -130,7 +128,7 @@ void MacroEngine::execAction(JsonObjectConst act, unsigned long now) {
   }
   if (strcmp(type, "led") == 0) {
     JsonArrayConst c = act["color"].as<JsonArrayConst>();
-    if (!c.isNull()) ledsSetAll(c[0] | 0, c[1] | 0, c[2] | 0);
+    if (!c.isNull()) ledsSetAllBase(c[0] | 0, c[1] | 0, c[2] | 0);  // smoothly eases in
     return;
   }
   if (strcmp(type, "led_anim") == 0) {
@@ -139,8 +137,8 @@ void MacroEngine::execAction(JsonObjectConst act, unsigned long now) {
     uint8_t r = c.isNull() ? 255 : (uint8_t)(c[0] | 0);
     uint8_t g = c.isNull() ? 255 : (uint8_t)(c[1] | 0);
     uint8_t b = c.isNull() ? 255 : (uint8_t)(c[2] | 0);
-    if (a.equalsIgnoreCase("flash")) flashAll(r, g, b, 2, 100, 80);
-    else if (a.equalsIgnoreCase("breathe")) ledsSetAll(r, g, b);
+    if (a.equalsIgnoreCase("flash")) ledsFlash(r, g, b);            // non-blocking pulse
+    else if (a.equalsIgnoreCase("breathe")) { ledsSetAllBase(r, g, b); ledsSetIdleMode(LED_IDLE_BREATHE); }
     return;
   }
   if (strcmp(type, "profile") == 0) {
@@ -164,8 +162,6 @@ void MacroEngine::finish() {
   inText = false;
   depth = 0;
   hidReleaseAll();
-  if (ledIndex >= 0) setKeyLed(ledIndex, 0, 0, 0);
-  ledIndex = -1;
 }
 
 void MacroEngine::abort() {

@@ -1,6 +1,7 @@
 #include "profiles.h"
 #include "config.h"
 #include "storage.h"
+#include "leds.h"
 #include <LittleFS.h>
 
 JsonDocument profileDoc;
@@ -62,5 +63,6 @@ bool loadProfile(int id) {
   Serial.printf("Loaded profile %d (%s)\n", id,
                 profileDoc["profile_name"] | "unnamed");
   updateProfileLEDs();
+  ledsApplyProfile();   // per-key resting colours + idle animation
   return true;
 }

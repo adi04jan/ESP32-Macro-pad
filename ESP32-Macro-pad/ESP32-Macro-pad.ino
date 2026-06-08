@@ -55,11 +55,7 @@ void loop() {
   scanTouch();
   scanKeys();
   macroEngine.tick();
-
-  if (!macroEngine.isRunning()) {
-    if (idleAnimation == 1) breatheTick(64, 64, 64);
-    else if (idleAnimation == 2) rainbowTick();
-  }
+  ledsTick();          // render one LED frame (frame-rate limited internally)
 
   delay(1);
 }
