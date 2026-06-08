@@ -1,2 +1,12 @@
 __pycache__/
 *.pyc
+
+# Device backups are local-only: flash dumps are large, and profile dumps can
+# contain plaintext secrets (password-typing macros). Keep only the README.
+device_backups/*
+!device_backups/README.md
+
+# Electron app build artifacts and dependencies
+studio/node_modules/
+studio/renderer/build/
+studio/dist-build/

@@ -1,0 +1,45 @@
+{
+  "name": "macropad-studio",
+  "productName": "Macropad Studio",
+  "version": "2.0.0",
+  "description": "Configurator for the ESP32-S2 macropad — device sync + local-AI macro generation.",
+  "main": "main.js",
+  "author": "adi04jan",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "rebuild": "electron-rebuild -f -w serialport",
+    "postinstall": "electron-rebuild -f -w serialport || echo skip-rebuild",
+    "dist": "electron-builder --win"
+  },
+  "build": {
+    "appId": "com.adi04jan.macropadstudio",
+    "productName": "Macropad Studio",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "services/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../macropad_default_templates.json",
+        "to": "macropad_default_templates.json"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "directories": {
+      "output": "dist-build"
+    }
+  },
+  "dependencies": {
+    "serialport": "^13.0.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.4",
+    "electron": "^42.3.3",
+    "electron-builder": "^26.15.2"
+  }
+}
