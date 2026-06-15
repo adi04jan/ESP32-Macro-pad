@@ -84,7 +84,7 @@ class SerialLink extends EventEmitter {
   _down() {
     this.port = null;
     // Release any in-flight read so awaiters don't hang on a dropped connection.
-    if (this._reading) this._finishRead();
+    if (this._reading) { this.emit("log", "Connection lost during a device operation.\n"); this._finishRead(); }
     this.emit("disconnect");
   }
 
@@ -116,15 +116,16 @@ class SerialLink extends EventEmitter {
       this._readLines = [];
       this._readResolve = resolve;
       clearTimeout(this._readTimer);
-      this._readTimer = setTimeout(() => this._finishRead(), CAPTURE_TIMEOUT_MS);
+      this._readTimer = setTimeout(() => this._finishRead(true), CAPTURE_TIMEOUT_MS);
       this.send(cmd);
     }));
   }
-  _finishRead() {
+  _finishRead(timedOut = false) {
     clearTimeout(this._readTimer);
     const lines = this._readLines;
     const resolve = this._readResolve;
     this._reading = false; this._readLines = []; this._readResolve = null;
+    if (timedOut) this.emit("log", "Device did not respond in time — request timed out.\n");
     if (resolve) resolve(lines.join("\n"));
   }
 
@@ -146,6 +147,7 @@ class SerialLink extends EventEmitter {
   setKey(keyNum, actions) { return this.command(`setkey ${keyNum} ${JSON.stringify(actions)}`); }
   setLed(keyNum, r, g, b) { return this.command(`setled ${parseInt(keyNum, 10)} ${r | 0} ${g | 0} ${b | 0}`); }
   setIdle(name) { return this.command(`setidle ${String(name)}`); }
+  setBrightness(b) { return this.command(`setbrightness ${Math.max(0, Math.min(255, b | 0))}`); }
 
   uploadProfile(filename, obj) {
     return this._runExclusive(() => new Promise((resolve) => {
@@ -157,9 +159,13 @@ class SerialLink extends EventEmitter {
       this._readLines = [];
       this._readResolve = () => resolve(true);   // resolves on the post-upload prompt
       clearTimeout(this._readTimer);
-      this._readTimer = setTimeout(() => this._finishRead(), 8000);
+      this._readTimer = setTimeout(() => { this.emit("log", "Upload timed out — device did not acknowledge.\n"); this._finishRead(); }, 8000);
       let i = 0;
-      const next = () => { if (i >= lines.length) return; this.send(lines[i++]); setTimeout(next, 8); };
+      const next = () => {
+        if (i >= lines.length) return;
+        if (!this.isOpen()) { this._finishRead(); return; }   // bail cleanly if the port dropped mid-upload
+        this.send(lines[i++]); setTimeout(next, 8);
+      };
       next();
     }));
   }

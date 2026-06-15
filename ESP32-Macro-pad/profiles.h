@@ -10,5 +10,6 @@ extern int  idleAnimation;        // mirrors LedIdleMode: 0 none,1 breathe,2 rai
 
 bool ensureDefaultProfile(int id);
 bool loadProfile(int id);
+bool loadProfileSafe(int id);     // load; on failure rewrite the default and retry
 void updateProfileLEDs();
 void ensureAllDefaultProfiles();

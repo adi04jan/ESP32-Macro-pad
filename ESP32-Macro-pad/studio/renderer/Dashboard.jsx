@@ -8,7 +8,7 @@
 
   const SAVE_LABEL = { pending: "Editing…", saving: "Saving…", saved: "Saved ✓", error: "Save failed" };
 
-  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, saveStatus, onBackupAll }) {
+  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll }) {
     const portOpts = ports.length ? ports.map((p) => ({ value: p.path, label: p.label || p.path })) : [{ value: "", label: "No ports found" }];
     const detected = isMacropad ? ports.find((p) => isMacropad(p)) : null;
     const saveChip = saveStatus && saveStatus !== "idle"
@@ -102,6 +102,15 @@
                 <div className="grow"><Field label="Default delay (ms)">
                   <input className="input mono" type="number" value={profile.default_delay}
                     onChange={(e) => onUpdateGlobal("default_delay", parseInt(e.target.value || "0"))} /></Field></div>
+              </div>
+              <div style={{ marginTop: 14 }}>
+                <div className="row between">
+                  <span className="field-label">LED brightness</span>
+                  <span className="mono fs12 faint">{Math.round(((profile.brightness != null ? profile.brightness : 80) / 255) * 100)}%</span>
+                </div>
+                <input type="range" min="0" max="255" step="1" value={profile.brightness != null ? profile.brightness : 80}
+                  onChange={(e) => { const v = parseInt(e.target.value || "0"); onSetBrightness ? onSetBrightness(v) : onUpdateGlobal("brightness", v); }}
+                  style={{ width: "100%", marginTop: 8, accentColor: "var(--accent)" }} />
               </div>
             </Panel>
 

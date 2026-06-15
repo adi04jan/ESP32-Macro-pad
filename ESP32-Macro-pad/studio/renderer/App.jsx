@@ -42,6 +42,7 @@
       profile_name: p.profile_name || "Profile",
       idle_animation: p.idle_animation || "none",
       default_delay: p.default_delay != null ? p.default_delay : 30,
+      brightness: p.brightness != null ? p.brightness : 80,
       active: activeSlot || 1,
       keys,
     };
@@ -279,6 +280,11 @@
       setLiveIdle(v);
       if (connectedRef.current) api.setIdle(v);
     };
+    // LED brightness: update profile + push live to device + autosave (debounced).
+    const setBrightnessVal = (v) => {
+      updateGlobal("brightness", v);
+      if (connectedRef.current) pushLive("brightness", () => api.setBrightness(v), 120);
+    };
 
     // ---- test animation (visual) + push to device ----
     const testRef = useRef(false);
@@ -499,6 +505,13 @@
         .finally(() => setKeyAiBusy(false));
     };
 
+    // Cancel any in-flight AI request and clear the busy indicators.
+    const cancelAi = useCallback(() => {
+      api.aiCancel();
+      setAiBusy(false); setKeyAiBusy(false);
+      log("AI request cancelled.", { cls: "er" });
+    }, [log]);
+
     const builderProps = { onRename: renameKey, onChangeAction: changeAction, onDeleteAction: deleteAction,
       onAddAction: addAction, onReorder: reorder, onTest: testKey, runningIndex,
       onAiGenerate: aiFillKey, aiBusy: keyAiBusy };
@@ -532,6 +545,9 @@
             {update.status === "downloading" &&
               <span className="chip" title="Downloading update…">
                 <Icon name="arrow-circle-down" w="bold" /> Updating{update.percent != null ? ` ${update.percent}%` : "…"}</span>}
+            {(aiBusy || keyAiBusy) &&
+              <span className="chip" style={{ cursor: "pointer" }} onClick={cancelAi} title="Cancel the AI request">
+                <Icon name="circle-notch" w="bold" /> AI… <b style={{ marginLeft: 4 }}>Cancel</b></span>}
             <button className={`conn-pill ${connected ? "on" : ""}`} onClick={() => setView("dashboard")}>
               <span className="conn-dot" /> {connected ? (port || "device") + " · live" : "Offline"}
             </button>
@@ -551,7 +567,7 @@
               {view === "dashboard" && React.createElement(window.Dashboard, {
                 profile, connected, port, setPort, ports, onRefreshPorts: refreshPorts, onToggleConn: toggleConn, logs,
                 onUpdateGlobal: updateGlobal, onSetActive: setActive, storage, onReload: reloadProfile, onImport: importDisk, onExport: exportDisk,
-                autoConnect, onToggleAutoConnect, isMacropad, onSetIdle: setIdleAnim, saveStatus, onBackupAll: backupAll,
+                autoConnect, onToggleAutoConnect, isMacropad, onSetIdle: setIdleAnim, onSetBrightness: setBrightnessVal, saveStatus, onBackupAll: backupAll,
               })}
               {view === "auto" && React.createElement(window.AutoSwitcher, {
                 enabled: autoEnabled, onToggle: onToggleAuto, activeCtx, setActiveCtx, regenKey, recsFor, onPush: pushRec, busy: aiBusy, detectedApp,

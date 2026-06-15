@@ -49,13 +49,16 @@ function writeJson(file, obj) {
 }
 
 // -- settings ---------------------------------------------------------------
+// The Python configurator stores the AI config under ai_* keys; Studio uses the
+// short names. Single source of truth for the alias mapping so reads (configurator
+// -> Studio) and writes (Studio -> configurator) can never drift apart.
+const AI_ALIASES = { ai_provider: "provider", ai_endpoint: "endpoint", ai_key: "key", ai_model: "model" };
+
 function loadSettings() {
   const raw = readJson(settingsFile(), {});
   const out = { ...DEFAULT_SETTINGS };
-  // Accept the configurator's keys too (ai_provider/ai_endpoint/...).
-  const map = { ai_provider: "provider", ai_endpoint: "endpoint", ai_key: "key", ai_model: "model" };
   for (const [k, v] of Object.entries(raw)) {
-    const key = map[k] || k;
+    const key = AI_ALIASES[k] || k;
     if (key in out && typeof v === typeof out[key]) out[key] = v;
   }
   return out;
@@ -63,11 +66,10 @@ function loadSettings() {
 function saveSettings(settings) {
   const cur = readJson(settingsFile(), {});
   const merged = { ...cur, ...settings };
-  // Mirror into the configurator's key names so both UIs share config.
-  merged.ai_provider = settings.provider ?? merged.ai_provider;
-  merged.ai_endpoint = settings.endpoint ?? merged.ai_endpoint;
-  merged.ai_key = settings.key ?? merged.ai_key;
-  merged.ai_model = settings.model ?? merged.ai_model;
+  // Mirror the short names back into the configurator's ai_* keys.
+  for (const [alias, canon] of Object.entries(AI_ALIASES)) {
+    if (settings[canon] != null) merged[alias] = settings[canon];
+  }
   return writeJson(settingsFile(), merged);
 }
 

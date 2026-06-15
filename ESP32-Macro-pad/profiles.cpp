@@ -2,6 +2,7 @@
 #include "config.h"
 #include "storage.h"
 #include "leds.h"
+#include "input.h"
 #include <LittleFS.h>
 
 JsonDocument profileDoc;
@@ -11,6 +12,14 @@ int  idleAnimation = 0;
 
 static String profilePath(int id) {
   return String("/profile") + String(id) + ".json";
+}
+
+// Forward-compat hook: bring an older on-disk profile up to the current schema.
+// v1 is current; future SCHEMA_VERSION bumps add migration steps here.
+static void migrateProfile(int fromVersion) {
+  // if (fromVersion < 2) { ...rename/add fields in profileDoc... }
+  if (fromVersion < SCHEMA_VERSION)
+    Serial.printf("Migrated profile schema v%d -> v%d\n", fromVersion, SCHEMA_VERSION);
 }
 
 bool ensureDefaultProfile(int id) {
@@ -55,6 +64,10 @@ bool loadProfile(int id) {
   profileLoaded = true;
   currentProfile = id;
 
+  // Migrate older on-disk schemas forward before anything reads the document.
+  int ver = profileDoc["schema_version"] | 1;
+  if (ver != SCHEMA_VERSION) { migrateProfile(ver); profileDoc["schema_version"] = SCHEMA_VERSION; }
+
   // Mirror LedIdleMode for the status readout (rendering itself is driven by
   // leds.cpp via ledsApplyProfile()).
   const char *anim = profileDoc["idle_animation"] | "none";
@@ -70,7 +83,20 @@ bool loadProfile(int id) {
                 profileDoc["profile_name"] | "unnamed");
   updateProfileLEDs();
   ledsApplyProfile();   // per-key resting colours + idle animation
+  int br = profileDoc["brightness"] | LED_BRIGHTNESS;                 // optional per-profile brightness
+  ledsSetBrightness((uint8_t)constrain(br, 0, 255));
+  inputApplyProfile();  // optional per-key debounce overrides
   Serial.printf("EVT:PROFILE %d\n", currentProfile);                 // tell the app the active slot changed
   Serial.printf("EVT:IDLE %s\n", ledsModeName(ledsGetIdleMode()));   // sync the app's mirror
   return true;
+}
+
+// Load a profile; if it's missing/corrupt, rewrite the shipped default and retry
+// so a bad LittleFS file can't soft-brick the device at boot.
+bool loadProfileSafe(int id) {
+  if (loadProfile(id)) return true;
+  Serial.printf("Profile %d unreadable — restoring default.\n", id);
+  LittleFS.remove(profilePath(id).c_str());
+  ensureDefaultProfile(id);
+  return loadProfile(id);
 }

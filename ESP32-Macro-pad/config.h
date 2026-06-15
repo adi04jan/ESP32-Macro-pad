@@ -115,3 +115,9 @@
 // guessed report id 3). If it fails to enumerate on your host, set to 0.
 #define ENABLE_TELEPHONY_HID  1
 #define TELEPHONY_REPORT_ID   8
+
+// ----- Watchdog -----
+// Task watchdog: panics + reboots if loop() stalls past the timeout. If it does
+// not compile on your Arduino-ESP32 core, set ENABLE_WATCHDOG to 0.
+#define ENABLE_WATCHDOG       1
+#define WDT_TIMEOUT_MS        8000

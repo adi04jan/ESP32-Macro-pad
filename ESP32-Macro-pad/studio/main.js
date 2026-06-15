@@ -234,6 +234,7 @@ function sanitizeProfile(p) {
     default_delay: Number.isInteger(p.default_delay) ? p.default_delay : 30,
     keys: [],
   };
+  if (Number.isInteger(p.brightness)) out.brightness = Math.max(0, Math.min(255, p.brightness));
   for (const k of p.keys || []) {
     const key = { id: k.id, actions: schema.repairActions(k.actions || []) };
     if (k.name) key.name = k.name;
@@ -253,6 +254,7 @@ ipcMain.handle("serial:loadProfile", (_e, filename) => link.requestProfile(filen
 ipcMain.handle("serial:setKey", (_e, knum, actions) => link.setKey(knum, schema.repairActions(actions)));
 ipcMain.handle("serial:setLed", (_e, knum, r, g, b) => link.setLed(knum, r, g, b));
 ipcMain.handle("serial:setIdle", (_e, name) => link.setIdle(name));
+ipcMain.handle("serial:setBrightness", (_e, b) => link.setBrightness(b));
 
 // Debounced auto-save: PC backup BEFORE the flash write, then upload.
 ipcMain.handle("device:autosave", async (_e, slot, profile) => {
@@ -330,9 +332,12 @@ ipcMain.handle("templates:get", (_e, ctx) => store.getContextShortcuts(ctx));
 ipcMain.handle("templates:ranked", (_e, ctx, limit) => store.rankShortcuts(ctx, limit));
 ipcMain.handle("templates:add", (_e, ctx, items) => store.addShortcuts(ctx, items));
 
-ipcMain.handle("ai:generateShortcuts", (_e, opts) => ai.generateShortcuts(store.loadSettings(), opts).catch((err) => { send("log", `AI error: ${err.message}\n`); return []; }));
-ipcMain.handle("ai:generateActions", (_e, desc) => ai.generateActions(store.loadSettings(), desc).catch((err) => { send("log", `AI error: ${err.message}\n`); return []; }));
+// Swallow user-cancelled/superseded aborts; surface real failures (incl. timeouts).
+const aiErr = (err) => { const m = String((err && err.message) || err); if (!/abort|cancel|supersed/i.test(m)) send("log", `AI error: ${m}\n`); return []; };
+ipcMain.handle("ai:generateShortcuts", (_e, opts) => ai.generateShortcuts(store.loadSettings(), opts).catch(aiErr));
+ipcMain.handle("ai:generateActions", (_e, desc) => ai.generateActions(store.loadSettings(), desc).catch(aiErr));
 ipcMain.handle("ai:test", () => ai.testConnection(store.loadSettings()).then(() => ({ ok: true })).catch((e) => ({ ok: false, error: e.message })));
+ipcMain.handle("ai:cancel", () => ai.cancel());
 
 ipcMain.handle("dialog:import", async () => {
   const r = await dialog.showOpenDialog(win, { filters: [{ name: "JSON", extensions: ["json"] }], properties: ["openFile"] });

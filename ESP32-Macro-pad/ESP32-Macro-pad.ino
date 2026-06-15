@@ -27,6 +27,10 @@
 #include "macro_engine.h"
 #include "cli.h"
 
+#if ENABLE_WATCHDOG
+#include "esp_task_wdt.h"
+#endif
+
 void setup() {
   Serial.begin(SERIAL_BAUD);
   unsigned long t0 = millis();
@@ -50,13 +54,24 @@ void setup() {
   hidBegin();
   delay(10);
 
-  loadProfile(1);
+#if ENABLE_WATCHDOG
+  // The core initialises the task WDT; widen it to our loop budget and subscribe
+  // the loop task. A stall past WDT_TIMEOUT_MS panics + reboots the device.
+  esp_task_wdt_config_t wdtCfg = { .timeout_ms = WDT_TIMEOUT_MS, .idle_core_mask = 0, .trigger_panic = true };
+  esp_task_wdt_reconfigure(&wdtCfg);
+  esp_task_wdt_add(NULL);
+#endif
+
+  loadProfileSafe(1);   // safe-boot: if profile 1 is corrupt, rewrite default + retry
 
   Serial.println("Ready");
   cliBegin();
 }
 
 void loop() {
+#if ENABLE_WATCHDOG
+  esp_task_wdt_reset();
+#endif
   handleSerialInput();
   scanTouch();
   scanKeys();

@@ -129,12 +129,11 @@ async function errBody(r) {
   catch (_) { return r.statusText || ""; }
 }
 
-async function callProvider(settings, system, user, jsonSchema) {
+async function callProvider(settings, system, user, jsonSchema, signal) {
   const provider = settings.provider || "Ollama (Local)";
-  const ctrl = AbortSignal.timeout ? AbortSignal.timeout(TIMEOUT_MS) : undefined;
   if (provider.includes("OpenAI")) {
     const r = await fetch(`${(settings.endpoint || "https://api.openai.com/v1").replace(/\/$/, "")}/chat/completions`, {
-      method: "POST", signal: ctrl,
+      method: "POST", signal,
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${settings.key}` },
       body: JSON.stringify({ model: settings.model || "gpt-4o-mini",
         messages: [{ role: "system", content: system }, { role: "user", content: user }],
@@ -146,7 +145,7 @@ async function callProvider(settings, system, user, jsonSchema) {
   if (provider.includes("Gemini")) {
     const model = settings.model || "gemini-2.5-flash";
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.key}`;
-    const r = await fetch(url, { method: "POST", signal: ctrl, headers: { "Content-Type": "application/json" },
+    const r = await fetch(url, { method: "POST", signal, headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ system_instruction: { parts: [{ text: system }] }, contents: [{ parts: [{ text: user }] }],
         generationConfig: { responseMimeType: "application/json" } }) });
     if (!r.ok) throw new Error(`Gemini (${model}) ${r.status}: ${await errBody(r)}`);
@@ -160,22 +159,39 @@ async function callProvider(settings, system, user, jsonSchema) {
   const base = (settings.endpoint || settings.key || "http://localhost:11434").replace(/\/$/, "");
   const body = { model: settings.model || "llama3", prompt: `${system}\n\n${user}`, stream: false };
   if (jsonSchema) body.format = jsonSchema;
-  let r = await fetch(`${base}/api/generate`, { method: "POST", signal: ctrl, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  if (!r.ok && jsonSchema) { body.format = "json"; r = await fetch(`${base}/api/generate`, { method: "POST", signal: ctrl, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
+  let r = await fetch(`${base}/api/generate`, { method: "POST", signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  if (!r.ok && jsonSchema) { body.format = "json"; r = await fetch(`${base}/api/generate`, { method: "POST", signal, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
   if (!r.ok) throw new Error(`Ollama ${r.status}: ${await errBody(r)}`);
   return (await r.json()).response || "";
 }
 
+// ---- run lifecycle: one cancellable controller + timeout per generate -----
+let activeController = null;
+function beginRun() {
+  if (activeController) { try { activeController.abort(new Error("superseded")); } catch (_) {} }
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => { try { ctrl.abort(new Error("timed out")); } catch (_) {} }, TIMEOUT_MS);
+  activeController = ctrl;
+  return { signal: ctrl.signal, done: () => { clearTimeout(timer); if (activeController === ctrl) activeController = null; } };
+}
+// Abort the in-flight request (user pressed Cancel).
+function cancel() {
+  if (activeController) { try { activeController.abort(new Error("cancelled")); } catch (_) {} activeController = null; return true; }
+  return false;
+}
+
 // ---- public generators ----------------------------------------------------
 async function generateShortcuts(settings, { context, existing = [], count = 4, keyNums = null } = {}) {
-  const raw = await callProvider(settings, systemShortcuts(), userShortcuts(context, existing, count, keyNums), shortcutsSchema());
+  const run = beginRun();
+  try {
+  const raw = await callProvider(settings, systemShortcuts(), userShortcuts(context, existing, count, keyNums), shortcutsSchema(), run.signal);
   let { valid, invalid } = partitionShortcuts(parseLenient(raw));
   if (invalid.length) {
     const errs = [...new Set(invalid.flatMap((x) => x.errors))];
     const repairUser = "Fix these validation errors and return ONLY the corrected JSON array.\nERRORS:\n" +
       errs.map((e) => "- " + e).join("\n") + "\n\nJSON:\n" + JSON.stringify(invalid.map((x) => x.item), null, 2);
     try {
-      const raw2 = await callProvider(settings, systemShortcuts(), repairUser, shortcutsSchema());
+      const raw2 = await callProvider(settings, systemShortcuts(), repairUser, shortcutsSchema(), run.signal);
       valid = valid.concat(partitionShortcuts(parseLenient(raw2)).valid);
     } catch (_) {}
   }
@@ -183,11 +199,14 @@ async function generateShortcuts(settings, { context, existing = [], count = 4, 
   const seen = new Set(); const out = [];
   for (const s of valid) { const k = (s.description || "").toLowerCase(); if (k && !seen.has(k)) { seen.add(k); out.push(s); } }
   return out;
+  } finally { run.done(); }
 }
 
 async function generateActions(settings, description) {
+  const run = beginRun();
+  try {
   const user = `Build a macro that does the following:\n${description}`;
-  const raw = await callProvider(settings, systemActions(), user, actionsSchema());
+  const raw = await callProvider(settings, systemActions(), user, actionsSchema(), run.signal);
   let actions = schema.repairActions(toArray(parseLenient(raw)));
   // One targeted repair pass if the first attempt isn't valid.
   if (!actions.length || !schema.isValidActions(actions)) {
@@ -195,17 +214,19 @@ async function generateActions(settings, description) {
     const repairUser = "The previous attempt was invalid. Fix these errors and return ONLY a JSON array of action objects.\nERRORS:\n" +
       (errors || ["invalid actions"]).map((e) => "- " + e).join("\n") + `\n\nTASK:\n${description}`;
     try {
-      const raw2 = await callProvider(settings, systemActions(), repairUser, actionsSchema());
+      const raw2 = await callProvider(settings, systemActions(), repairUser, actionsSchema(), run.signal);
       const a2 = schema.repairActions(toArray(parseLenient(raw2)));
       if (a2.length && schema.isValidActions(a2)) actions = a2;
     } catch (_) {}
   }
   return actions.length && schema.isValidActions(actions) ? actions : [];
+  } finally { run.done(); }
 }
 
 async function testConnection(settings) {
-  await callProvider(settings, "Reply with the single word OK.", "ping", null);
-  return true;
+  const run = beginRun();
+  try { await callProvider(settings, "Reply with the single word OK.", "ping", null, run.signal); return true; }
+  finally { run.done(); }
 }
 
-module.exports = { generateShortcuts, generateActions, testConnection, parseLenient, partitionShortcuts };
+module.exports = { generateShortcuts, generateActions, testConnection, cancel, parseLenient, partitionShortcuts };

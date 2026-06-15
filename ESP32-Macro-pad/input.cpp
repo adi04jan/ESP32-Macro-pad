@@ -3,6 +3,7 @@
 #include "leds.h"
 #include "profiles.h"
 #include "macro_engine.h"
+#include <ArduinoJson.h>
 
 static const uint8_t buttonPins[NUM_KEYS] = {
   BUTTON_PIN_1, BUTTON_PIN_2, BUTTON_PIN_3, BUTTON_PIN_4,
@@ -15,6 +16,7 @@ static const uint8_t HW_TO_LOGICAL[NUM_KEYS] = HW_TO_LOGICAL_INIT;
 
 static uint8_t keyState[NUM_KEYS];
 static unsigned long keyLastChange[NUM_KEYS];
+static uint16_t keyDebounceMs[NUM_KEYS];   // per-key debounce window (hw-indexed)
 
 static int baselineA = 0, baselineB = 0;
 static unsigned long touchDebounceA = 0, touchDebounceB = 0;
@@ -24,6 +26,7 @@ void inputBegin() {
     pinMode(buttonPins[i], INPUT_PULLUP);
     keyState[i] = digitalRead(buttonPins[i]) ? 0 : 1;
     keyLastChange[i] = millis();
+    keyDebounceMs[i] = DEFAULT_DEBOUNCE_MS;
   }
   pinMode(LED_PIN_1, OUTPUT);
   pinMode(LED_PIN_2, OUTPUT);
@@ -50,7 +53,7 @@ void scanKeys() {
   for (int i = 0; i < NUM_KEYS; i++) {
     uint8_t raw = (digitalRead(buttonPins[i]) == LOW) ? 1 : 0;
     if (raw == keyState[i]) continue;
-    if (millis() - keyLastChange[i] <= DEFAULT_DEBOUNCE_MS) continue;
+    if (millis() - keyLastChange[i] <= keyDebounceMs[i]) continue;
     keyState[i] = raw;
     keyLastChange[i] = millis();
     int logical = HW_TO_LOGICAL[i];    // natural key number for profiles/app/EVT
@@ -66,6 +69,19 @@ void scanKeys() {
       ledsKeyUp(i);                    // highlight fades out
       Serial.printf("EVT:KEY %d 0\n", logical);
     }
+  }
+}
+
+// Refresh per-key debounce from the active profile (optional "debounce" field on
+// a key; falls back to DEFAULT_DEBOUNCE_MS). Indexed by hardware position.
+void inputApplyProfile() {
+  for (int i = 0; i < NUM_KEYS; i++) keyDebounceMs[i] = DEFAULT_DEBOUNCE_MS;
+  if (!profileLoaded || !profileDoc["keys"].is<JsonArray>()) return;
+  for (JsonObjectConst ko : profileDoc["keys"].as<JsonArrayConst>()) {
+    int id = ko["id"] | 0;
+    if (id < 1 || id > NUM_KEYS || !ko["debounce"].is<int>()) continue;
+    int db = constrain((int)(ko["debounce"] | DEFAULT_DEBOUNCE_MS), 0, 1000);
+    for (int i = 0; i < NUM_KEYS; i++) if (HW_TO_LOGICAL[i] == id) { keyDebounceMs[i] = (uint16_t)db; break; }
   }
 }
 

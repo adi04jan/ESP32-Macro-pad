@@ -53,7 +53,7 @@ static void cliHandleLine(const String &line) {
   arg.trim();
 
   if (cmd == "help") {
-    Serial.println("help ls cat <f> setprofile <n> setkey <id> <json> setled <k> <r> <g> <b> setidle <name> status fsinfo reboot");
+    Serial.println("help ls cat <f> setprofile <n> setkey <id> <json> setled <k> <r> <g> <b> setidle <name> setbrightness <0-255> status fsinfo reboot");
   } else if (cmd == "setled") {
     // Live per-key resting colour (not persisted until a profile is saved).
     int k, r, g, b;
@@ -71,6 +71,12 @@ static void cliHandleLine(const String &line) {
     idleAnimation = (int)m;   // keep the status readout in sync
     Serial.printf("EVT:IDLE %s\n", ledsModeName(m));
     Serial.printf("idle %s\n", ledsModeName(m));
+  } else if (cmd == "setbrightness") {
+    // Live global LED brightness; stored on the profile so a save persists it.
+    int b = constrain(arg.toInt(), 0, 255);
+    ledsSetBrightness((uint8_t)b);
+    profileDoc["brightness"] = b;
+    Serial.printf("brightness %d\n", b);
   } else if (cmd == "fsinfo") {
     Serial.printf("FS_INFO:%u,%u\n", (unsigned)LittleFS.totalBytes(), (unsigned)LittleFS.usedBytes());
   } else if (cmd == "ls") {

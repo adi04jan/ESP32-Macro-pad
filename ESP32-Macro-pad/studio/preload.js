@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld("api", {
   setKey: (knum, actions) => ipcRenderer.invoke("serial:setKey", knum, actions),
   setLed: (knum, r, g, b) => ipcRenderer.invoke("serial:setLed", knum, r, g, b),
   setIdle: (name) => ipcRenderer.invoke("serial:setIdle", name),
+  setBrightness: (b) => ipcRenderer.invoke("serial:setBrightness", b),
   autoSave: (slot, profile) => ipcRenderer.invoke("device:autosave", slot, profile),
   switchProfile: (n) => ipcRenderer.invoke("device:switchProfile", n),
   backupAll: () => ipcRenderer.invoke("backup:all"),
@@ -30,6 +31,7 @@ contextBridge.exposeInMainWorld("api", {
   aiShortcuts: (opts) => ipcRenderer.invoke("ai:generateShortcuts", opts),
   aiActions: (desc) => ipcRenderer.invoke("ai:generateActions", desc),
   aiTest: () => ipcRenderer.invoke("ai:test"),
+  aiCancel: () => ipcRenderer.invoke("ai:cancel"),
 
   // auto-update
   getUpdate: () => ipcRenderer.invoke("update:get"),
