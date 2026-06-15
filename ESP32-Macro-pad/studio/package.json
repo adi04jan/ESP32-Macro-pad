@@ -16,7 +16,8 @@
     "build": "node build.js",
     "rebuild": "electron-rebuild -f -w serialport",
     "postinstall": "electron-rebuild -f -w serialport || echo skip-rebuild",
-    "dist": "node build.js && electron-builder --win"
+    "dist": "node build.js && electron-builder --win",
+    "test": "node --test"
   },
   "build": {
     "appId": "com.adi04jan.macropadstudio",
@@ -40,6 +41,10 @@
       {
         "from": "../macropad_default_templates.json",
         "to": "macropad_default_templates.json"
+      },
+      {
+        "from": "../firmware",
+        "to": "firmware"
       }
     ],
     "win": {
@@ -67,6 +72,7 @@
   },
   "dependencies": {
     "electron-updater": "^6.8.9",
+    "esptool-js": "^0.5.7",
     "serialport": "^13.0.0"
   },
   "devDependencies": {
