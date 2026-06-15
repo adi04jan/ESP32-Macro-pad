@@ -3,12 +3,15 @@
    ============================================================ */
 (function () {
   const { useState, useRef, useEffect } = React;
-  const { Icon, Btn, IconBtn, Select, Field, Panel, Toggle } = window.UI;
+  const { Icon, Btn, IconBtn, Select, Field, Panel, Toggle, Confirm } = window.UI;
   const M = window.MACRO;
+
+  const cmpSemver = (a, b) => { const pa=String(a).split(".").map(Number), pb=String(b).split(".").map(Number);
+    for (let i=0;i<3;i++){ const d=(pa[i]||0)-(pb[i]||0); if(d) return d>0?1:-1; } return 0; };
 
   const SAVE_LABEL = { pending: "Editing…", saving: "Saving…", saved: "Saved ✓", error: "Save failed" };
 
-  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll }) {
+  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll, fwBundled = {}, fwDevice, flash, onFlash, onFlashDismiss }) {
     const portOpts = ports.length ? ports.map((p) => ({ value: p.path, label: p.label || p.path })) : [{ value: "", label: "No ports found" }];
     const detected = isMacropad ? ports.find((p) => isMacropad(p)) : null;
     const saveChip = saveStatus && saveStatus !== "idle"
@@ -20,6 +23,7 @@
     }, [logs]);
 
     const usedPct = storage.total ? storage.used / storage.total : 0;
+    const [askFlash, setAskFlash] = React.useState(false);
 
     return (
       <div className="view-enter">
@@ -56,6 +60,44 @@
                 <span className="conn-dot" /> {connected ? "Live · " + port.split(" ")[0] : (autoConnect ? "Searching…" : "Not connected")}
               </div>
             </Panel>
+
+            {(() => {
+              const selectedIsMacropad = detected && port && detected.path === port;
+              const outdated = selectedIsMacropad && fwDevice && fwBundled.version && cmpSemver(fwDevice, fwBundled.version) < 0;
+              const showRecover = port && !selectedIsMacropad && !connected;
+              if (!fwBundled.available || (!showRecover && !outdated)) return null;
+              const flashing = flash && flash.phase && flash.phase !== "error" && flash.phase !== "done";
+              return (
+                <Panel title={outdated ? "Firmware update" : "Flash / recover firmware"} icon="lightning"
+                       sub={outdated ? `v${fwDevice} → v${fwBundled.version}` : `No macropad detected on ${port}`}>
+                  <div className="fs13" style={{ color: "var(--danger, #ff5d6c)", marginBottom: 10 }}>
+                    ⚠ Flashing erases everything on the board, including all saved profiles.
+                  </div>
+                  {flash && flash.phase === "error" && flash.code === "NEEDS_DOWNLOAD_MODE" &&
+                    <div className="fs12 faint" style={{ marginBottom: 10 }}>
+                      Couldn't reach the bootloader. Hold <b>BOOT</b>, tap <b>RESET</b>, then Retry.</div>}
+                  {flash && flash.phase === "error" && flash.code !== "NEEDS_DOWNLOAD_MODE" &&
+                    <div className="fs12" style={{ color: "var(--danger,#ff5d6c)", marginBottom: 10 }}>{flash.error}</div>}
+                  {flash && flash.phase === "done" &&
+                    <div className="fs12" style={{ color: "var(--ok,#2fe6a8)", marginBottom: 10 }}>Done — the board will reboot. Reconnect above.</div>}
+                  {flashing
+                    ? <div>
+                        <div className="row between"><span className="fs12 faint">{flash.phase}…</span>
+                          <span className="mono fs12 faint">{flash.percent != null ? flash.percent + "%" : ""}</span></div>
+                        <div style={{ height: 6, borderRadius: 99, background: "var(--line)", marginTop: 6 }}>
+                          <div style={{ height: "100%", width: (flash.percent || 0) + "%", background: "var(--accent)", borderRadius: 99 }} /></div>
+                      </div>
+                    : <Btn icon="lightning" variant="danger" onClick={() => setAskFlash(true)}>
+                        {outdated ? "Update firmware" : `Flash firmware v${fwBundled.version}`}</Btn>}
+                  <Confirm open={askFlash}
+                    title={outdated ? "Update firmware?" : "Flash firmware?"}
+                    message={`This erases the entire board — all profiles are lost — and writes firmware v${fwBundled.version}. The board may need BOOT+RESET to enter flashing mode. Continue?`}
+                    confirmLabel={outdated ? "Erase & update" : "Erase & flash"}
+                    onCancel={() => setAskFlash(false)}
+                    onConfirm={() => { setAskFlash(false); onFlash && onFlash(port); }} />
+                </Panel>
+              );
+            })()}
 
             {/* profiles */}
             <Panel title="Profiles" icon="stack" sub="Edit any slot · auto-saves live" right={saveChip}>

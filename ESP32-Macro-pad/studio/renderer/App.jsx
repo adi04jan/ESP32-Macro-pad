@@ -76,6 +76,9 @@
     const [widgetAlpha, setWidgetAlpha] = useState(0.98);
     const [flags, setFlags] = useState({ widget_stay_on_top: true, widget_snap: true, widget_auto_hide: false, confirm_destructive: true, open_at_login: false });
     const [update, setUpdate] = useState({ status: "idle" });   // auto-update status from main
+    const [fwBundled, setFwBundled] = useState({ version: null, available: false });
+    const [fwDevice, setFwDevice] = useState(null);     // device FW version string
+    const [flash, setFlash] = useState(null);           // {phase,percent,code,error} | null
 
     const [aiRecs, setAiRecs] = useState({});      // ctxId -> [shortcut]
     const [aiBusy, setAiBusy] = useState(false);
@@ -156,6 +159,7 @@
         applySettingsToState(s);
         refreshPorts();                            // first scan after the setting is known
       });
+      api.flashInfo().then((i) => setFwBundled(i || { version: null, available: false }));
       const off = api.onEvent(({ type, data }) => {
         if (type === "log") log(data);
         else if (type === "open") {
@@ -166,7 +170,7 @@
             .then((p) => { if (p) { setProfile(fromDevice(p, slot)); setSaveStatus("idle"); } })
             .catch((e) => log(`Initial load error: ${e.message}`, { cls: "er" }));
         }
-        else if (type === "disconnect") { setConnected(false); clearTimeout(saveTimerRef.current); setSaveStatus("idle"); }
+        else if (type === "disconnect") { setConnected(false); clearTimeout(saveTimerRef.current); setSaveStatus("idle"); setFwDevice(null); }
         else if (type === "fs-info") setStorage(data);
         else if (type === "profile") {
           clearTimeout(saveTimerRef.current); saveTimerRef.current = null;
@@ -178,6 +182,8 @@
         else if (type === "key") { if (simRef.current) { const i = (data.key | 0) - 1; data.down ? simRef.current.keyDown(i) : simRef.current.keyUp(i); } }
         else if (type === "idle") { setLiveIdle(data.mode || "none"); }
         else if (type === "update") { setUpdate(data || { status: "idle" }); }
+        else if (type === "fw-version") { setFwDevice(data && data.version); }
+        else if (type === "flash") { setFlash(data); }
         else if (type === "profile-active") {
           // The device switched profile on its own (touch pad). Reload that slot
           // into the editor so the UI + overlay reflect it. Skip if we initiated it.
@@ -478,6 +484,14 @@
       }).catch((e) => log(`Factory reset error: ${e.message}`, { cls: "er" }));
     };
 
+    const startFlash = (portPath) => {
+      setFlash({ phase: "connecting", percent: 0 });
+      api.flashStart(portPath).then((r) => {
+        if (r && r.ok) { setFlash({ phase: "done", percent: 100 }); setTimeout(refreshPorts, 1500); }
+        else if (!(r && r.code)) setFlash({ phase: "error", error: (r && r.error) || "flash failed" });
+      }).catch((e) => setFlash({ phase: "error", error: e.message }));
+    };
+
     // ---- command palette ----
     const runCmd = (kind, arg) => {
       if (kind === "nav") setView(arg);
@@ -568,6 +582,7 @@
                 profile, connected, port, setPort, ports, onRefreshPorts: refreshPorts, onToggleConn: toggleConn, logs,
                 onUpdateGlobal: updateGlobal, onSetActive: setActive, storage, onReload: reloadProfile, onImport: importDisk, onExport: exportDisk,
                 autoConnect, onToggleAutoConnect, isMacropad, onSetIdle: setIdleAnim, onSetBrightness: setBrightnessVal, saveStatus, onBackupAll: backupAll,
+                fwBundled, fwDevice, flash, onFlash: startFlash, onFlashDismiss: () => setFlash(null),
               })}
               {view === "auto" && React.createElement(window.AutoSwitcher, {
                 enabled: autoEnabled, onToggle: onToggleAuto, activeCtx, setActiveCtx, regenKey, recsFor, onPush: pushRec, busy: aiBusy, detectedApp,
