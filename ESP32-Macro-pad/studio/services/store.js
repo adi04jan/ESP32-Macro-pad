@@ -29,9 +29,14 @@ const DEFAULT_SETTINGS = {
   key: "",
   model: "llama3",
   widget_alpha: 0.98,
+  widget_stay_on_top: true,
+  widget_snap: true,
+  widget_auto_hide: false,
   auto_switch_enabled: false,
   auto_connect: true,
   auto_assign: false,
+  confirm_destructive: true,
+  open_at_login: false,
 };
 
 function readJson(file, fallback) {
@@ -64,6 +69,16 @@ function saveSettings(settings) {
   merged.ai_key = settings.key ?? merged.ai_key;
   merged.ai_model = settings.model ?? merged.ai_model;
   return writeJson(settingsFile(), merged);
+}
+
+// Wipe user customization: settings -> defaults, drop templates + usage stats.
+// The shipped default templates (resource dir) are untouched.
+function factoryReset() {
+  const ok = writeJson(settingsFile(), { ...DEFAULT_SETTINGS });
+  writeJson(customFile(), {});
+  try { fs.unlinkSync(usageFile()); } catch (_) {}
+  _custom = null; _usage = null;   // drop caches so the next read reflects the wipe
+  return ok;
 }
 
 // -- templates --------------------------------------------------------------
@@ -167,5 +182,5 @@ function rankShortcuts(context, limit = 8) {
   return scored.slice(0, limit).map((x, i) => ({ ...x.s, key_num: (i % 4) + 1, uses: x.count }));
 }
 
-module.exports = { configure, loadSettings, saveSettings, getContextShortcuts, addShortcuts,
+module.exports = { configure, loadSettings, saveSettings, factoryReset, getContextShortcuts, addShortcuts,
   recordUsage, rankShortcuts, signature, readJson, writeJson };

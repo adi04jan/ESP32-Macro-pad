@@ -73,6 +73,7 @@
     const [advanced, setAdvanced] = useState(false);
     const [settings, setSettings] = useState({ provider: "Ollama (Local)", key: "http://localhost:11434", model: "llama3" });
     const [widgetAlpha, setWidgetAlpha] = useState(0.98);
+    const [flags, setFlags] = useState({ widget_stay_on_top: true, widget_snap: true, widget_auto_hide: false, confirm_destructive: true, open_at_login: false });
 
     const [aiRecs, setAiRecs] = useState({});      // ctxId -> [shortcut]
     const [aiBusy, setAiBusy] = useState(false);
@@ -128,16 +129,29 @@
       });
     }, [log]);
 
+    // Push a settings object from main into the split local state (used on boot
+    // and after a factory reset).
+    const applySettingsToState = useCallback((s) => {
+      const isOllama = (s.provider || "").includes("Ollama");
+      setSettings({ provider: s.provider, key: isOllama ? s.endpoint : s.key, model: s.model });
+      setWidgetAlpha(s.widget_alpha != null ? s.widget_alpha : 0.98);
+      setAutoEnabled(!!s.auto_switch_enabled); autoEnabledRef.current = !!s.auto_switch_enabled;
+      setAutoAssign(!!s.auto_assign); autoAssignRef.current = !!s.auto_assign;
+      const ac = s.auto_connect !== false;     // default ON
+      autoConnectRef.current = ac; setAutoConnect(ac);
+      setFlags({
+        widget_stay_on_top: s.widget_stay_on_top !== false,
+        widget_snap: s.widget_snap !== false,
+        widget_auto_hide: !!s.widget_auto_hide,
+        confirm_destructive: s.confirm_destructive !== false,
+        open_at_login: !!s.open_at_login,
+      });
+    }, []);
+
     // ---- boot: settings + ports + serial event stream ----
     useEffect(() => {
       api.getSettings().then((s) => {
-        const isOllama = (s.provider || "").includes("Ollama");
-        setSettings({ provider: s.provider, key: isOllama ? s.endpoint : s.key, model: s.model });
-        setWidgetAlpha(s.widget_alpha != null ? s.widget_alpha : 0.98);
-        setAutoEnabled(!!s.auto_switch_enabled); autoEnabledRef.current = !!s.auto_switch_enabled;
-        setAutoAssign(!!s.auto_assign); autoAssignRef.current = !!s.auto_assign;
-        const ac = s.auto_connect !== false;     // default ON
-        autoConnectRef.current = ac; setAutoConnect(ac);
+        applySettingsToState(s);
         refreshPorts();                            // first scan after the setting is known
       });
       const off = api.onEvent(({ type, data }) => {
@@ -182,7 +196,7 @@
       // hotplug when enabled and not manually disconnected.
       const poll = setInterval(() => { refreshPorts(); }, 3000);
       return () => { off && off(); clearInterval(poll); };
-    }, [refreshPorts, log]);
+    }, [refreshPorts, log, applySettingsToState]);
 
     // ⌘K
     useEffect(() => {
@@ -437,6 +451,25 @@
     const onWidgetAlpha = (a) => { setWidgetAlpha(a); api.setSettings({ widget_alpha: a }); };
     const onToggleAuto = (v) => { setAutoEnabled(v); api.setSettings({ auto_switch_enabled: v }); };
 
+    // Persisted on/off flags (widget behaviour, confirm-destructive, launch-at-startup).
+    const onFlag = (key, val) => { setFlags((f) => ({ ...f, [key]: val })); api.setSettings({ [key]: val }); };
+    const onToggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
+    const onExportAll = () => {
+      if (!connectedRef.current) { log("Connect a device to export all profiles.", { cls: "er" }); return; }
+      api.exportAll().then((r) => {
+        if (r && r.ok) log(`Exported ${r.count} profiles → ${r.path}`, { cls: "ok" });
+        else if (r && r.error) log(`Export all failed: ${r.error}`, { cls: "er" });
+      }).catch((e) => log(`Export all error: ${e.message}`, { cls: "er" }));
+    };
+    const onFactoryReset = () => {
+      api.factoryReset().then((r) => {
+        if (r && r.ok) {
+          log("Factory reset complete — settings and templates cleared.", { cls: "ok" });
+          api.getSettings().then(applySettingsToState);
+        } else log("Factory reset failed.", { cls: "er" });
+      }).catch((e) => log(`Factory reset error: ${e.message}`, { cls: "er" }));
+    };
+
     // ---- command palette ----
     const runCmd = (kind, arg) => {
       if (kind === "nav") setView(arg);
@@ -518,6 +551,7 @@
               {view === "settings" && React.createElement(window.Settings, {
                 settings, onChange: onChangeSettings, advancedMode: advanced, onAdvancedMode: setAdvanced,
                 widgetAlpha, onWidgetAlpha, onTest: () => api.aiTest(),
+                theme, onToggleTheme, flags, onFlag, onExportAll, onFactoryReset,
               })}
             </div>
           </div>

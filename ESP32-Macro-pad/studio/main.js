@@ -3,7 +3,7 @@
 
 "use strict";
 
-const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeImage, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeImage, shell, screen } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
@@ -24,7 +24,11 @@ let tray = null;                 // system-tray icon (close minimizes here)
 let trayHintShown = false;       // one-time "still running" balloon
 let widgetWin = null;            // always-on-top key overlay
 let widgetProfile = null;        // last profile pushed from the main window
+let widgetIdleTimer = null;      // auto-hide-when-idle timer for the overlay
 let currentContext = "global";   // focused-app context (from window detection)
+
+const WIDGET_IDLE_MS = 8000;     // hide the overlay after this long without a keypress
+const WIDGET_SNAP_PX = 24;       // snap the overlay to a screen edge within this margin
 
 function send(type, data) { if (win && !win.isDestroyed()) win.webContents.send("serial:event", { type, data }); }
 function sendWidget(channel, data) { if (widgetWin && !widgetWin.isDestroyed()) widgetWin.webContents.send(channel, data); }
@@ -36,7 +40,7 @@ link.on("ready", () => send("ready"));
 link.on("open", () => send("open"));
 link.on("disconnect", () => send("disconnect"));
 link.on("keyevent", (d) => {
-  send("key", d); sendWidget("widget:key", d);   // overlay press-flash
+  send("key", d); sendWidget("widget:key", d); widgetActivity();   // overlay press-flash + un-idle
   // Usage tracking: a press "uses" the macro bound to that key in the focused context.
   if (d && d.down && widgetProfile) {
     const k = (widgetProfile.keys || []).find((x) => x.id === d.key);
@@ -98,8 +102,32 @@ function createWindow() {
   win.on("closed", () => { if (widgetWin && !widgetWin.isDestroyed()) widgetWin.close(); win = null; });
 }
 
+// Snap the overlay to the nearest screen edge once a drag finishes.
+function snapWidget() {
+  if (!store.loadSettings().widget_snap || !widgetWin || widgetWin.isDestroyed()) return;
+  const b = widgetWin.getBounds();
+  const area = screen.getDisplayNearestPoint({ x: b.x + b.width / 2, y: b.y + b.height / 2 }).workArea;
+  let x = b.x, y = b.y;
+  if (Math.abs(b.x - area.x) < WIDGET_SNAP_PX) x = area.x;
+  if (Math.abs((b.x + b.width) - (area.x + area.width)) < WIDGET_SNAP_PX) x = area.x + area.width - b.width;
+  if (Math.abs(b.y - area.y) < WIDGET_SNAP_PX) y = area.y;
+  if (Math.abs((b.y + b.height) - (area.y + area.height)) < WIDGET_SNAP_PX) y = area.y + area.height - b.height;
+  if (x !== b.x || y !== b.y) widgetWin.setBounds({ x, y, width: b.width, height: b.height });
+}
+
+// Auto-hide-when-idle: a keypress re-shows the overlay and restarts the timer.
+function widgetActivity() {
+  if (!store.loadSettings().widget_auto_hide || !widgetWin || widgetWin.isDestroyed()) return;
+  if (!widgetWin.isVisible()) widgetWin.show();
+  clearTimeout(widgetIdleTimer);
+  widgetIdleTimer = setTimeout(() => { if (widgetWin && !widgetWin.isDestroyed()) widgetWin.hide(); }, WIDGET_IDLE_MS);
+}
+
+function applyLoginItem(open) { try { app.setLoginItemSettings({ openAtLogin: !!open }); } catch (_) {} }
+
 // Frameless, transparent, always-on-top overlay showing the live key map.
 function createWidgetWindow() {
+  const s = store.loadSettings();
   widgetWin = new BrowserWindow({
     width: 236, height: 300, minWidth: 190, minHeight: 220,
     frame: false, transparent: true, resizable: true, skipTaskbar: true,
@@ -107,13 +135,13 @@ function createWidgetWindow() {
     backgroundColor: "#00000000", title: "Macropad Overlay",
     webPreferences: { preload: path.join(__dirname, "widget-preload.js"), contextIsolation: true, nodeIntegration: false },
   });
-  widgetWin.setAlwaysOnTop(true, "screen-saver");          // float above full-screen apps
+  widgetWin.setAlwaysOnTop(s.widget_stay_on_top !== false, "screen-saver");   // float above full-screen apps
   widgetWin.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   widgetWin.removeMenu();
-  const a = store.loadSettings().widget_alpha;
-  widgetWin.setOpacity(typeof a === "number" ? Math.max(0.4, Math.min(1, a)) : 0.98);
+  widgetWin.setOpacity(typeof s.widget_alpha === "number" ? Math.max(0.4, Math.min(1, s.widget_alpha)) : 0.98);
+  widgetWin.on("moved", snapWidget);                       // edge-snap after a drag
   widgetWin.loadFile(path.join(__dirname, "renderer", "widget.html"));
-  widgetWin.on("closed", () => { widgetWin = null; });
+  widgetWin.on("closed", () => { clearTimeout(widgetIdleTimer); widgetWin = null; });
 }
 
 function toggleWidget() {
@@ -163,7 +191,9 @@ if (!app.requestSingleInstanceLock()) {
     const resourceDir = app.isPackaged ? process.resourcesPath : path.resolve(__dirname, "..");
     store.configure({ dataDir, resourceDir });
     backup.configure({ dataDir });
-    if (store.loadSettings().auto_switch_enabled) startDetection();
+    const boot = store.loadSettings();
+    if (boot.auto_switch_enabled) startDetection();
+    applyLoginItem(boot.open_at_login);
     createWindow();
     createTray();
   });
@@ -246,11 +276,24 @@ ipcMain.on("widget:close", () => { if (widgetWin && !widgetWin.isDestroyed()) wi
 ipcMain.handle("settings:get", () => store.loadSettings());
 ipcMain.handle("settings:set", (_e, s) => {
   const r = store.saveSettings(s);
-  if (s && typeof s.widget_alpha === "number" && widgetWin && !widgetWin.isDestroyed()) {
+  const liveWidget = widgetWin && !widgetWin.isDestroyed();
+  if (s && typeof s.widget_alpha === "number" && liveWidget) {
     widgetWin.setOpacity(Math.max(0.4, Math.min(1, s.widget_alpha)));
   }
+  if (s && "widget_stay_on_top" in s && liveWidget) widgetWin.setAlwaysOnTop(!!s.widget_stay_on_top, "screen-saver");
+  if (s && "widget_auto_hide" in s && !s.widget_auto_hide) {   // turning it off: cancel the timer + re-show
+    clearTimeout(widgetIdleTimer);
+    if (liveWidget && !widgetWin.isVisible()) widgetWin.show();
+  }
   if (s && "auto_switch_enabled" in s) { s.auto_switch_enabled ? startDetection() : stopDetection(); }
+  if (s && "open_at_login" in s) applyLoginItem(s.open_at_login);
   return r;
+});
+
+ipcMain.handle("settings:reset", () => {
+  const ok = store.factoryReset();
+  applyLoginItem(false);
+  return { ok };
 });
 
 ipcMain.handle("templates:get", (_e, ctx) => store.getContextShortcuts(ctx));
@@ -272,4 +315,20 @@ ipcMain.handle("dialog:export", async (_e, profile) => {
   if (r.canceled || !r.filePath) return null;
   try { fs.writeFileSync(r.filePath, JSON.stringify(sanitizeProfile(profile), null, 2)); return { ok: true, path: r.filePath }; }
   catch (e) { return { ok: false, error: e.message }; }
+});
+
+// Export all 3 device profiles into a single JSON file.
+ipcMain.handle("dialog:exportAll", async () => {
+  if (!link.isOpen()) return { ok: false, error: "not connected" };
+  const profiles = {};
+  for (const slot of [1, 2, 3]) {
+    const raw = await link.readFile(`profile${slot}.json`);
+    try { profiles[slot] = JSON.parse(stripCatEcho(raw)); } catch (_) {}
+  }
+  const r = await dialog.showSaveDialog(win, { defaultPath: "macropad-profiles.json", filters: [{ name: "JSON", extensions: ["json"] }] });
+  if (r.canceled || !r.filePath) return null;
+  try {
+    fs.writeFileSync(r.filePath, JSON.stringify({ exported: new Date().toISOString(), profiles }, null, 2));
+    return { ok: true, path: r.filePath, count: Object.keys(profiles).length };
+  } catch (e) { return { ok: false, error: e.message }; }
 });

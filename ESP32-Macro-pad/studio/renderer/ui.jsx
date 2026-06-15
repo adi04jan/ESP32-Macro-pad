@@ -155,5 +155,33 @@
 
   function rgbCss(c) { return c ? `rgb(${c[0]},${c[1]},${c[2]})` : "transparent"; }
 
-  window.UI = { Icon, Btn, IconBtn, Toggle, Segmented, Select, Field, Panel, Collapse, useDismiss, ActionTile, rgbCss };
+  // Modal confirmation for destructive actions. Closes on Escape / backdrop click.
+  function Confirm({ open, title = "Are you sure?", message, confirmLabel = "Confirm",
+                     cancelLabel = "Cancel", danger = true, onConfirm, onCancel }) {
+    useEffect(() => {
+      if (!open) return;
+      const onKey = (e) => { if (e.key === "Escape") onCancel && onCancel(); };
+      window.addEventListener("keydown", onKey);
+      return () => window.removeEventListener("keydown", onKey);
+    }, [open, onCancel]);
+    if (!open) return null;
+    return (
+      <div onMouseDown={(e) => { if (e.target === e.currentTarget) onCancel && onCancel(); }}
+        style={{ position: "fixed", inset: 0, zIndex: 1000, display: "grid", placeItems: "center",
+          background: "rgba(0,0,0,0.5)", backdropFilter: "blur(3px)" }}>
+        <div style={{ width: 430, maxWidth: "90vw", background: "var(--panel, #1c1c26)",
+          border: "1px solid var(--line-strong, rgba(255,255,255,0.13))", borderRadius: 16,
+          padding: 22, boxShadow: "0 24px 60px rgba(0,0,0,0.5)" }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>{title}</div>
+          {message && <div style={{ fontSize: 13, lineHeight: 1.5, color: "var(--text-faint)", marginBottom: 18 }}>{message}</div>}
+          <div className="row" style={{ gap: 8, justifyContent: "flex-end" }}>
+            <Btn size="sm" onClick={onCancel}>{cancelLabel}</Btn>
+            <Btn size="sm" variant={danger ? "danger" : "primary"} onClick={onConfirm}>{confirmLabel}</Btn>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  window.UI = { Icon, Btn, IconBtn, Toggle, Segmented, Select, Field, Panel, Collapse, useDismiss, ActionTile, rgbCss, Confirm };
 })();

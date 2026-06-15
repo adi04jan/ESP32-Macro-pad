@@ -3,7 +3,7 @@
    ============================================================ */
 (function () {
   const { useState } = React;
-  const { Icon, Btn, Panel, Field, Select, Segmented, Toggle } = window.UI;
+  const { Icon, Btn, Panel, Field, Select, Segmented, Toggle, Confirm } = window.UI;
 
   const PROVIDERS = {
     "Ollama (Local)": { keyLabel: "Ollama URL", keyPlaceholder: "http://localhost:11434", secret: false, model: "llama3:70b", icon: "hard-drives" },
@@ -11,11 +11,15 @@
     "Gemini":         { keyLabel: "API Key",    keyPlaceholder: "AIza…",                  secret: true,  model: "gemini-1.5-flash", icon: "sparkle" },
   };
 
-  function Settings({ settings, onChange, advancedMode, onAdvancedMode, widgetAlpha, onWidgetAlpha, onTest }) {
+  function Settings({ settings, onChange, advancedMode, onAdvancedMode, widgetAlpha, onWidgetAlpha, onTest,
+                      theme = "dark", onToggleTheme, flags = {}, onFlag, onExportAll, onFactoryReset }) {
     const prov = settings.provider;
     const meta = PROVIDERS[prov];
     const [showKey, setShowKey] = useState(false);
     const [testState, setTestState] = useState(null); // null | "testing" | "ok" | "fail"
+    const [showReset, setShowReset] = useState(false);
+    const flag = (k, dflt = false) => (flags[k] != null ? flags[k] : dflt);
+    const requestReset = () => { if (flag("confirm_destructive", true)) setShowReset(true); else onFactoryReset && onFactoryReset(); };
     const runTest = () => {
       if (!onTest) return;
       setTestState("testing");
@@ -56,6 +60,14 @@
                 {!testState && <span className="hint"><Icon name="lock-simple" w="bold" /> Stored locally only</span>}
               </div>
             </Panel>
+
+            <Panel title="Appearance" icon="palette" sub="Studio theme">
+              <Field label="Theme">
+                <Segmented value={theme}
+                  onChange={(v) => { if (v !== theme && onToggleTheme) onToggleTheme(); }}
+                  options={[{ value: "dark", label: "Dark", icon: "moon-stars" }, { value: "light", label: "Light", icon: "sun" }]} />
+              </Field>
+            </Panel>
           </div>
 
           <div className="col" style={{ gap: 18 }}>
@@ -68,19 +80,19 @@
                 onChange={(e) => onWidgetAlpha(parseFloat(e.target.value))}
                 style={{ width: "100%", marginTop: 10, accentColor: "var(--accent)" }} />
               <div className="divider" />
-              <Row label="Stay on top" sub="Float above other windows" on={true} />
-              <Row label="Snap to edges" sub="Magnetic window borders" on={true} />
-              <Row label="Auto-hide when idle" sub="Fade out after 30s" on={false} />
+              <Row label="Stay on top" sub="Float above other windows" on={flag("widget_stay_on_top", true)} onChange={(v) => onFlag("widget_stay_on_top", v)} />
+              <Row label="Snap to edges" sub="Magnetic screen-edge borders" on={flag("widget_snap", true)} onChange={(v) => onFlag("widget_snap", v)} />
+              <Row label="Auto-hide when idle" sub="Hide after 8s without a keypress" on={flag("widget_auto_hide")} onChange={(v) => onFlag("widget_auto_hide", v)} />
             </Panel>
 
             <Panel title="Power user" icon="terminal" sub="Hidden depth, when you want it">
               <Row label="Advanced mode" sub="Reveal raw JSON & low-level fields everywhere" on={advancedMode} onChange={onAdvancedMode} />
-              <Row label="Command palette" sub="Press ⌘K / Ctrl-K anywhere" on={true} />
-              <Row label="Confirm destructive actions" sub="Ask before wiping a profile" on={true} />
+              <Row label="Launch at startup" sub="Open Macropad Studio when you log in" on={flag("open_at_login")} onChange={(v) => onFlag("open_at_login", v)} />
+              <Row label="Confirm destructive actions" sub="Ask before resetting or wiping" on={flag("confirm_destructive", true)} onChange={(v) => onFlag("confirm_destructive", v)} />
               <div className="divider" />
               <div className="row" style={{ gap: 8 }}>
-                <Btn size="sm" icon="export">Export all profiles</Btn>
-                <Btn size="sm" variant="danger" icon="trash">Factory reset</Btn>
+                <Btn size="sm" icon="export" onClick={onExportAll}>Export all profiles</Btn>
+                <Btn size="sm" variant="danger" icon="trash" onClick={requestReset}>Factory reset</Btn>
               </div>
             </Panel>
 
@@ -100,6 +112,12 @@
             </Panel>
           </div>
         </div>
+
+        <Confirm open={showReset} title="Factory reset?"
+          message="This restores all settings to defaults and clears your saved templates and usage stats. Profiles stored on the device are not touched. This cannot be undone."
+          confirmLabel="Reset everything"
+          onCancel={() => setShowReset(false)}
+          onConfirm={() => { setShowReset(false); onFactoryReset && onFactoryReset(); }} />
       </div>
     );
   }

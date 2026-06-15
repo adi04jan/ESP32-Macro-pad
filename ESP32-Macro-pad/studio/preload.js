@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("api", {
   // settings / templates
   getSettings: () => ipcRenderer.invoke("settings:get"),
   setSettings: (s) => ipcRenderer.invoke("settings:set", s),
+  factoryReset: () => ipcRenderer.invoke("settings:reset"),
   getTemplates: (ctx) => ipcRenderer.invoke("templates:get", ctx),
   getRankedTemplates: (ctx, limit) => ipcRenderer.invoke("templates:ranked", ctx, limit),
   addTemplates: (ctx, items) => ipcRenderer.invoke("templates:add", ctx, items),
@@ -37,6 +38,7 @@ contextBridge.exposeInMainWorld("api", {
   // disk
   importProfile: () => ipcRenderer.invoke("dialog:import"),
   exportProfile: (profile) => ipcRenderer.invoke("dialog:export", profile),
+  exportAll: () => ipcRenderer.invoke("dialog:exportAll"),
 
   // serial events (log / fs-info / ready / open / disconnect / profile / key / idle)
   onEvent: (cb) => {
