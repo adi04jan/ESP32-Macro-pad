@@ -83,13 +83,13 @@ async function flashFirmware(portPath, binPath, onProgress = () => {}) {
     onProgress({ phase: "writing", percent: 0 });
     await esploader.writeFlash({
       fileArray: [{ data, address: 0x0 }],
-      flashSize: "keep", eraseAll: true, compress: true,
+      flashSize: "keep", flashMode: "keep", flashFreq: "keep", eraseAll: true, compress: true,
       reportProgress: (_i, written, total) => {
         onProgress({ phase: "writing", percent: total ? Math.round((written / total) * 100) : 0 });
       },
     });
     onProgress({ phase: "done", percent: 100 });
-    try { await esploader.hardReset(); } catch (_) {}
+    try { await esploader.after("hard_reset"); } catch (_) {}
   } finally {
     try { await transport.disconnect(); } catch (_) {}
   }
