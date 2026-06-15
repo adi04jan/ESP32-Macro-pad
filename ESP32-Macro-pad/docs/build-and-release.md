@@ -50,7 +50,14 @@ The installer is too large to commit, so it ships as a release asset.
    Or, without the GitHub CLI, create the release in the web UI
    (**Releases → Draft a new release**), pick the tag, and upload the `.exe`.
 
+> **Auto-update:** `package.json` configures `build.publish` (GitHub), so
+> `electron-builder` also emits **`latest.yml`** (and a `.blockmap`) in
+> `dist-build/`. Upload **`latest.yml` + the `.exe` + the `.blockmap`** to the
+> release — `electron-updater` reads `latest.yml` to detect and download updates.
+> Without `latest.yml` attached, installed apps won't see the new version.
+
 ### Version
 
-`2.0.0` is the v2 rewrite: modular non-blocking firmware (ArduinoJson 7) and the
-Macropad Studio desktop app replacing the legacy CustomTkinter configurator.
+`2.0.0` was the v2 rewrite (modular non-blocking firmware + Macropad Studio).
+`2.1.0` adds auto-update, finished Settings, LED-brightness / per-key-debounce,
+and firmware safe-boot + watchdog.

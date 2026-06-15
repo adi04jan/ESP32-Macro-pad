@@ -107,7 +107,7 @@
             <Panel title="About" icon="info" sub="Macropad Studio">
               <div className="row between">
                 <span className="fs13 fw600">Macropad Studio</span>
-                <span className="mono fs12 faint">v2.0.1</span>
+                <span className="mono fs12 faint">v2.1.0</span>
               </div>
               <span className="fs12 faint">Configurator for the ESP32-S2 macropad — device sync + local-AI macro generation.</span>
               <div className="divider" />

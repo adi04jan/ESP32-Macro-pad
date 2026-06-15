@@ -4,7 +4,7 @@
    --------------------------------------------------------------------------- */
 #pragma once
 
-#define FW_VERSION       "2.0.0"
+#define FW_VERSION       "2.1.0"
 #define SCHEMA_VERSION   1
 
 // ----- USB identity (used by the Studio app for auto-detection) -----
