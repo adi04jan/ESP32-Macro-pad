@@ -38,9 +38,11 @@ class SerialLink extends EventEmitter {
     super();
     this.port = null;
     this._partial = "";
-    this._capturing = false;
-    this._captureLines = [];
-    this._captureTimer = null;
+    this._reading = false;       // a command()/upload is awaiting its prompt
+    this._readLines = [];
+    this._readResolve = null;
+    this._readTimer = null;
+    this._chain = null;          // serialized command queue
   }
 
   async listPorts() {
@@ -81,7 +83,8 @@ class SerialLink extends EventEmitter {
 
   _down() {
     this.port = null;
-    this._clearCapture();
+    // Release any in-flight read so awaiters don't hang on a dropped connection.
+    if (this._reading) this._finishRead();
     this.emit("disconnect");
   }
 
@@ -95,51 +98,91 @@ class SerialLink extends EventEmitter {
     this.port.write(cmd + "\n", (e) => { if (e) this.emit("log", `Write error: ${e.message}\n`); });
   }
 
-  requestFsInfo() { this.send("fsinfo"); }
-  setActiveProfile(n) { this.send(`setprofile ${parseInt(n, 10)}`); }
-
-  requestProfile(path) {
-    if (!path.startsWith("/")) path = "/" + path;
-    this._beginCapture();
-    this.send(`cat ${path}`);
+  // ---- serialized device I/O ----------------------------------------
+  // The device is a single line interface terminated by a prompt. Running every
+  // interaction exclusively (one at a time) stops prompts from being attributed
+  // to the wrong command when several are issued close together.
+  _runExclusive(fn) {
+    const run = () => fn();
+    this._chain = (this._chain || Promise.resolve()).then(run, run);
+    return this._chain;
   }
 
+  // Send a command, resolve with its output once the prompt returns.
+  command(cmd) {
+    return this._runExclusive(() => new Promise((resolve) => {
+      if (!this.isOpen()) return resolve("");
+      this._reading = true;
+      this._readLines = [];
+      this._readResolve = resolve;
+      clearTimeout(this._readTimer);
+      this._readTimer = setTimeout(() => this._finishRead(), CAPTURE_TIMEOUT_MS);
+      this.send(cmd);
+    }));
+  }
+  _finishRead() {
+    clearTimeout(this._readTimer);
+    const lines = this._readLines;
+    const resolve = this._readResolve;
+    this._reading = false; this._readLines = []; this._readResolve = null;
+    if (resolve) resolve(lines.join("\n"));
+  }
+
+  requestFsInfo() { return this.command("fsinfo"); }   // FS_INFO line emits 'fs-info' during the read
+  setActiveProfile(n) { return this.command(`setprofile ${parseInt(n, 10)}`); }
+
+  // Raw file contents (no 'file'/'profile' emit) — used by the editor + backups.
+  readFile(filename) {
+    if (!filename.startsWith("/")) filename = "/" + filename;
+    return this.command(`cat ${filename}`);
+  }
+
+  // Explicit "Reload" path: read then emit 'file' for the 'profile' flow.
+  requestProfile(path) {
+    if (!path.startsWith("/")) path = "/" + path;
+    this.command(`cat ${path}`).then((raw) => this.emit("file", raw.split("\n")));
+  }
+
+  setKey(keyNum, actions) { return this.command(`setkey ${keyNum} ${JSON.stringify(actions)}`); }
+  setLed(keyNum, r, g, b) { return this.command(`setled ${parseInt(keyNum, 10)} ${r | 0} ${g | 0} ${b | 0}`); }
+  setIdle(name) { return this.command(`setidle ${String(name)}`); }
+
   uploadProfile(filename, obj) {
-    return new Promise((resolve) => {
+    return this._runExclusive(() => new Promise((resolve) => {
+      if (!this.isOpen()) return resolve(false);
       let lines;
       try { lines = buildUploadLines(filename, obj); }
       catch (e) { this.emit("log", `Serialization error: ${e.message}\n`); return resolve(false); }
+      this._reading = true;
+      this._readLines = [];
+      this._readResolve = () => resolve(true);   // resolves on the post-upload prompt
+      clearTimeout(this._readTimer);
+      this._readTimer = setTimeout(() => this._finishRead(), 8000);
       let i = 0;
-      const next = () => {
-        if (i >= lines.length) { this.emit("log", "Upload sequence sent.\n"); return resolve(true); }
-        this.send(lines[i++]);
-        setTimeout(next, 10);
-      };
+      const next = () => { if (i >= lines.length) return; this.send(lines[i++]); setTimeout(next, 8); };
       next();
-    });
+    }));
   }
 
-  setKey(keyNum, actions) {
-    this.send(`setkey ${keyNum} ${JSON.stringify(actions)}`);
-  }
-
-  // -- capture --------------------------------------------------------
-  _beginCapture() {
-    this._capturing = true;
-    this._captureLines = [];
-    clearTimeout(this._captureTimer);
-    this._captureTimer = setTimeout(() => {
-      this.emit("log", "Warning: file capture timed out.\n");
-      this._finishCapture();
-    }, CAPTURE_TIMEOUT_MS);
-  }
-
-  _clearCapture() { this._capturing = false; this._captureLines = []; clearTimeout(this._captureTimer); }
-
-  _finishCapture() {
-    const lines = this._captureLines;
-    this._clearCapture();
-    this.emit("file", lines);
+  // Device -> app live events: "KEY <n> <1|0>" or "IDLE <name>".
+  _handleEvent(body) {
+    const t = body.split(/\s+/);
+    if (t[0] === "KEY") this.emit("keyevent", { key: parseInt(t[1], 10), down: t[2] === "1" });
+    else if (t[0] === "IDLE") this.emit("idleevent", { mode: t[1] || "none" });
+    else if (t[0] === "PROFILE") this.emit("profileevent", { profile: parseInt(t[1], 10) });
+    else if (t[0] === "LEDS") {
+      const hex = t[1] || "";
+      if (hex.length >= 48) {   // 12 LEDs x RGB565 (4 hex each), hardware order
+        const f = new Array(12);
+        for (let i = 0; i < 12; i++) {
+          const v = parseInt(hex.substr(i * 4, 4), 16);
+          let r = (v >> 11) & 0x1F, g = (v >> 5) & 0x3F, b = v & 0x1F;
+          r = (r << 3) | (r >> 2); g = (g << 2) | (g >> 4); b = (b << 3) | (b >> 2);   // expand to 8-bit
+          f[i] = [r, g, b];
+        }
+        this.emit("ledsframe", f);
+      }
+    }
   }
 
   // -- line assembly --------------------------------------------------
@@ -162,15 +205,18 @@ class SerialLink extends EventEmitter {
 
   _handleLine(line) {
     const clean = line.replace(/\r/g, "");
+    // Device->app live events. Divert before capture so they never land in a
+    // profile JSON being read via `cat`.
+    if (clean.startsWith("EVT:")) { this._handleEvent(clean.slice(4).trim()); return; }
     const fs = parseFsInfo(clean);
     if (fs) { this.emit("fs-info", fs); return; }
     if (clean.includes(PROMPT)) {
-      if (this._capturing) this._finishCapture();
+      if (this._reading) this._finishRead();
       this.emit("ready");
       return;
     }
-    if (this._capturing) this._captureLines.push(clean);
-    else if (clean.trim() !== "") this.emit("log", clean + "\n");
+    if (this._reading) { this._readLines.push(clean); return; }
+    if (clean.trim() !== "") this.emit("log", clean + "\n");
   }
 }
 

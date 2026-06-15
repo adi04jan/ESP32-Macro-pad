@@ -6,19 +6,17 @@
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' 'unsafe-inline';
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com;
-  font-src https://fonts.gstatic.com https://unpkg.com data:;
+  style-src 'self' 'unsafe-inline';
+  font-src 'self' data:;
   img-src 'self' data:;
   connect-src 'self';" />
 <title>Macropad Studio</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css" />
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<!-- Vendored offline assets (generated into build/ by build.js) -->
+<link rel="stylesheet" href="build/fonts.css" />
+<link rel="stylesheet" href="build/phosphor/regular/style.css" />
+<link rel="stylesheet" href="build/phosphor/bold/style.css" />
+<link rel="stylesheet" href="build/phosphor/fill/style.css" />
 
 <link rel="stylesheet" href="styles.css" />
 </head>
@@ -41,13 +39,13 @@
 
 <!-- Pre-transformed renderer (built by build.js) -->
 <script src="build/data.js"></script>
+<script src="build/ledsim.js"></script>
 <script src="build/ui.js"></script>
 <script src="build/ActionBuilder.js"></script>
 <script src="build/KeyEditor.js"></script>
 <script src="build/Dashboard.js"></script>
 <script src="build/AutoSwitcher.js"></script>
 <script src="build/Settings.js"></script>
-<script src="build/Widget.js"></script>
 <script src="build/CommandPalette.js"></script>
 <script src="build/App.js"></script>
 </body>

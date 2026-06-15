@@ -11,13 +11,18 @@ contextBridge.exposeInMainWorld("api", {
   fsinfo: () => ipcRenderer.invoke("serial:fsinfo"),
   setActive: (n) => ipcRenderer.invoke("serial:setActive", n),
   loadProfile: (filename) => ipcRenderer.invoke("serial:loadProfile", filename),
-  saveProfile: (filename, profile) => ipcRenderer.invoke("serial:saveProfile", filename, profile),
   setKey: (knum, actions) => ipcRenderer.invoke("serial:setKey", knum, actions),
+  setLed: (knum, r, g, b) => ipcRenderer.invoke("serial:setLed", knum, r, g, b),
+  setIdle: (name) => ipcRenderer.invoke("serial:setIdle", name),
+  autoSave: (slot, profile) => ipcRenderer.invoke("device:autosave", slot, profile),
+  switchProfile: (n) => ipcRenderer.invoke("device:switchProfile", n),
+  backupAll: () => ipcRenderer.invoke("backup:all"),
 
   // settings / templates
   getSettings: () => ipcRenderer.invoke("settings:get"),
   setSettings: (s) => ipcRenderer.invoke("settings:set", s),
   getTemplates: (ctx) => ipcRenderer.invoke("templates:get", ctx),
+  getRankedTemplates: (ctx, limit) => ipcRenderer.invoke("templates:ranked", ctx, limit),
   addTemplates: (ctx, items) => ipcRenderer.invoke("templates:add", ctx, items),
 
   // AI
@@ -25,11 +30,15 @@ contextBridge.exposeInMainWorld("api", {
   aiActions: (desc) => ipcRenderer.invoke("ai:generateActions", desc),
   aiTest: () => ipcRenderer.invoke("ai:test"),
 
+  // always-on-top key overlay
+  toggleWidget: () => ipcRenderer.invoke("widget:toggle"),
+  widgetSetProfile: (profile) => ipcRenderer.invoke("widget:setProfile", profile),
+
   // disk
   importProfile: () => ipcRenderer.invoke("dialog:import"),
   exportProfile: (profile) => ipcRenderer.invoke("dialog:export", profile),
 
-  // serial events (log / fs-info / ready / open / disconnect / profile)
+  // serial events (log / fs-info / ready / open / disconnect / profile / key / idle)
   onEvent: (cb) => {
     const handler = (_e, payload) => cb(payload);
     ipcRenderer.on("serial:event", handler);

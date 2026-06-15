@@ -31,7 +31,7 @@ const MEDIA_NAMES = ["PLAY_PAUSE", "STOP", "NEXT", "PREVIOUS", "MUTE", "VOLUME_U
 const TELEPHONY_NAMES = ["MIC_MUTE", "ANSWER", "DECLINE"];
 const MOUSE_BUTTONS = ["LEFT", "RIGHT", "MIDDLE"];
 const LED_ANIM_VALUES = ["flash", "breathe"];
-const IDLE_ANIMATIONS = ["none", "breathe", "rainbow", "flash"];
+const IDLE_ANIMATIONS = ["none", "breathe", "rainbow", "flash", "wave", "comet", "twinkle", "ripple"];
 const ACTION_TYPES = [
   "comment", "delay", "key", "keycombo", "text", "multiline", "hold", "release",
   "repeat", "media", "mouse_move", "mouse_click", "led", "led_anim", "profile", "telephony",

@@ -38,6 +38,10 @@
     led_anim:    ["flash","breathe","rainbow","none"],
   };
 
+  // Whole-profile idle LED patterns (mirrors firmware + schema). Spatial patterns
+  // (wave/comet/twinkle/ripple) flow across the physical key grid.
+  const IDLE_ANIMATIONS = ["none", "breathe", "rainbow", "wave", "comet", "twinkle", "ripple"];
+
   // Pretty key glyph
   const KEY_GLYPH = {
     LEFT_CTRL: "Ctrl", RIGHT_CTRL: "Ctrl", LEFT_SHIFT: "Shift", RIGHT_SHIFT: "Shift",
@@ -70,53 +74,45 @@
     ],
   };
 
-  // Physical key positions captured from the hardware (top row swapped, third
-  // row reversed vs. the naive numbering).
+  // Natural left-to-right / top-to-bottom key numbering. The firmware remaps the
+  // hardware wiring to this order, so the grid is simply sequential.
   const LAYOUT = [
-    [null, 2, 1, null],
+    [null, 1, 2, null],
     [3, 4, 5, 6],
-    [10, 9, 8, 7],
+    [7, 8, 9, 10],
     [null, 11, 12, null],
   ];
 
-  // AI context recommendations
+  // App contexts. `match` = lowercase Windows process-name fragments used to
+  // auto-detect the focused app; recommendations are pulled (usage-ranked) from
+  // the shortcut library per context. `global` is the fallback.
   const CONTEXTS = [
-    { id: "vscode", label: "Visual Studio Code", icon: "ph-code", sub: "code · editor",
-      recs: [
-        { key_num: 1, description: "Command Palette", actions:[{type:"keycombo",keys:["LEFT_CTRL","LEFT_SHIFT","P"]}] },
-        { key_num: 2, description: "Toggle Sidebar",  actions:[{type:"keycombo",keys:["LEFT_CTRL","B"]}] },
-        { key_num: 3, description: "Format Document",  actions:[{type:"keycombo",keys:["LEFT_SHIFT","LEFT_ALT","F"]}] },
-        { key_num: 4, description: "Go to Definition", actions:[{type:"key",value:"F12"}] },
-      ] },
-    { id: "vscode_terminal", label: "VS Code · Terminal", icon: "ph-terminal-window", sub: "shell · bash",
-      recs: [
-        { key_num: 1, description: "Git Push",   actions:[{type:"text",value:"git push"},{type:"key",value:"ENTER"}] },
-        { key_num: 2, description: "Clear",      actions:[{type:"text",value:"clear"},{type:"key",value:"ENTER"}] },
-        { key_num: 3, description: "Run Dev",    actions:[{type:"text",value:"npm run dev"},{type:"key",value:"ENTER"}] },
-        { key_num: 4, description: "Kill (C-c)", actions:[{type:"keycombo",keys:["LEFT_CTRL","C"]}] },
-      ] },
-    { id: "chrome", label: "Google Chrome", icon: "ph-globe", sub: "browser",
-      recs: [
-        { key_num: 1, description: "New Tab",     actions:[{type:"keycombo",keys:["LEFT_CTRL","T"]}] },
-        { key_num: 2, description: "Reopen Tab",  actions:[{type:"keycombo",keys:["LEFT_CTRL","LEFT_SHIFT","T"]}] },
-        { key_num: 3, description: "Hard Reload", actions:[{type:"keycombo",keys:["LEFT_CTRL","LEFT_SHIFT","R"]}] },
-        { key_num: 4, description: "DevTools",    actions:[{type:"key",value:"F12"}] },
-      ] },
-    { id: "figma", label: "Figma", icon: "ph-pen-nib", sub: "design",
-      recs: [
-        { key_num: 1, description: "Frame Tool",   actions:[{type:"key",value:"F"}] },
-        { key_num: 2, description: "Components",   actions:[{type:"keycombo",keys:["LEFT_ALT","2"]}] },
-        { key_num: 3, description: "Group",        actions:[{type:"keycombo",keys:["LEFT_CTRL","G"]}] },
-        { key_num: 4, description: "Export",       actions:[{type:"keycombo",keys:["LEFT_CTRL","LEFT_SHIFT","E"]}] },
-      ] },
-    { id: "excel", label: "Microsoft Excel", icon: "ph-table", sub: "spreadsheet",
-      recs: [
-        { key_num: 1, description: "Sum Cells",  actions:[{type:"keycombo",keys:["LEFT_ALT","EQUAL"]}] },
-        { key_num: 2, description: "New Row",    actions:[{type:"keycombo",keys:["LEFT_CTRL","LEFT_SHIFT","EQUAL"]}] },
-        { key_num: 3, description: "Fill Down",  actions:[{type:"keycombo",keys:["LEFT_CTRL","D"]}] },
-        { key_num: 4, description: "Format",     actions:[{type:"keycombo",keys:["LEFT_CTRL","1"]}] },
-      ] },
+    { id: "global",   label: "Windows",        icon: "windows-logo",    sub: "system-wide",   match: [] },
+    { id: "chrome",   label: "Browser",        icon: "globe",           sub: "chrome · edge", match: ["chrome", "msedge", "brave", "opera", "vivaldi", "firefox"] },
+    { id: "vscode",   label: "VS Code",        icon: "code",            sub: "editor",        match: ["code", "code - insiders", "cursor"] },
+    { id: "terminal", label: "Terminal",       icon: "terminal-window", sub: "shell",         match: ["windowsterminal", "wt", "powershell", "pwsh", "cmd", "conhost", "alacritty"] },
+    { id: "slack",    label: "Slack",          icon: "slack-logo",      sub: "chat",          match: ["slack"] },
+    { id: "discord",  label: "Discord",        icon: "discord-logo",    sub: "chat",          match: ["discord"] },
+    { id: "figma",    label: "Figma",          icon: "pen-nib",         sub: "design",        match: ["figma"] },
+    { id: "excel",    label: "Excel",          icon: "table",           sub: "spreadsheet",   match: ["excel"] },
+    { id: "word",     label: "Word",           icon: "file-doc",        sub: "documents",     match: ["winword"] },
+    { id: "outlook",  label: "Outlook",        icon: "envelope",        sub: "email",         match: ["outlook"] },
+    { id: "explorer", label: "File Explorer",  icon: "folder",          sub: "files",         match: ["explorer"] },
+    { id: "photoshop",label: "Photoshop",      icon: "image",           sub: "design",        match: ["photoshop"] },
+    { id: "spotify",  label: "Spotify",        icon: "music-notes",     sub: "music",         match: ["spotify"] },
+    { id: "notion",   label: "Notion",         icon: "note",            sub: "notes",         match: ["notion"] },
+    { id: "teams",    label: "Teams",          icon: "users-three",     sub: "meetings",      match: ["teams", "ms-teams"] },
+    { id: "zoom",     label: "Zoom",           icon: "video-camera",    sub: "meetings",      match: ["zoom"] },
+    { id: "media",    label: "Media",          icon: "speaker-high",    sub: "playback",      match: [] },
   ];
+
+  // Resolve a focused-window process name to a context id (most-specific first).
+  function contextForProcess(proc) {
+    const p = (proc || "").toLowerCase().replace(/\.exe$/, "");
+    if (!p) return null;
+    for (const c of CONTEXTS) { if ((c.match || []).some((m) => p.includes(m))) return c.id; }
+    return null;
+  }
 
   const PORTS = ["COM3 · USB Serial", "COM4 · ESP32-S3", "/dev/ttyACM0"];
 
@@ -147,5 +143,5 @@
     return key.glow || null;
   }
 
-  window.MACRO = { ACTION_META, CATS, KEYS, ENUMS, glyph, SEED, LAYOUT, CONTEXTS, PORTS, summarize, ledColorOf };
+  window.MACRO = { ACTION_META, CATS, KEYS, ENUMS, IDLE_ANIMATIONS, glyph, SEED, LAYOUT, CONTEXTS, contextForProcess, PORTS, summarize, ledColorOf };
 })();

@@ -160,7 +160,7 @@
   }
 
   // ---- single action card ----
-  function ActionCard({ action, index, total, running, onChange, onDelete, onDrag, dragState }) {
+  function ActionCard({ action, index, total, running, onChange, onDelete, onMove, onDrag, dragState }) {
     const meta = M.ACTION_META[action.type];
     const [armed, setArmed] = useState(false);
     const isDragging = dragState.from === index;
@@ -186,6 +186,8 @@
           <ValueEditor action={action} onChange={onChange} />
         </div>
         <div className="ac-actions">
+          {index > 0 && <IconBtn icon="arrow-up" size="sm" title="Move up" onClick={() => onMove(index - 1)} />}
+          {index < total - 1 && <IconBtn icon="arrow-down" size="sm" title="Move down" onClick={() => onMove(index + 1)} />}
           <IconBtn icon="trash" size="sm" title="Delete step" onClick={onDelete} />
         </div>
       </div>
@@ -232,13 +234,16 @@
   }
 
   // ---- main builder ----
-  function ActionBuilder({ keyData, runningIndex, onRename, onChangeAction, onDeleteAction, onAddAction, onReorder, onTest, defaultAdvanced }) {
+  function ActionBuilder({ keyData, runningIndex, onRename, onChangeAction, onDeleteAction, onAddAction, onReorder, onTest, onAiGenerate, aiBusy, defaultAdvanced }) {
     const [pickerOpen, setPickerOpen] = useState(false);
     const [advanced, setAdvanced] = useState(!!defaultAdvanced);
     const [drag, setDrag] = useState({ from: null, over: null });
+    const [aiOpen, setAiOpen] = useState(false);
+    const [aiPrompt, setAiPrompt] = useState("");
     const actions = keyData.actions || [];
 
     useEffect(() => { setAdvanced(!!defaultAdvanced); }, [defaultAdvanced]);
+    const runAi = () => { if (aiPrompt.trim()) { onAiGenerate(aiPrompt); setAiPrompt(""); } };
 
     const handleDrag = (phase, index) => {
       if (phase === "start") setDrag({ from: index, over: index });
@@ -256,8 +261,18 @@
               onChange={(e) => onRename(e.target.value)} />
             <div className="sub">{actions.length} step{actions.length !== 1 ? "s" : ""} · runs top to bottom</div>
           </div>
+          {onAiGenerate && <Btn icon="sparkle" onClick={() => setAiOpen((v) => !v)} style={aiOpen ? { color: "var(--accent)" } : null}>AI</Btn>}
           <Btn icon="play" variant="primary" onClick={onTest} disabled={!actions.length}>Test</Btn>
         </div>
+
+        {aiOpen && onAiGenerate && (
+          <div className="row" style={{ gap: 8, marginBottom: 16 }}>
+            <input className="input grow" autoFocus placeholder="Describe this key in words — e.g. “open terminal and run npm test”"
+              value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") runAi(); }} />
+            <Btn variant="primary" icon="sparkle" disabled={aiBusy || !aiPrompt.trim()} onClick={runAi}>{aiBusy ? "Generating…" : "Generate"}</Btn>
+          </div>
+        )}
 
         <div className="timeline">
           {actions.length === 0 ? (
@@ -272,6 +287,7 @@
                 running={runningIndex === i}
                 onChange={(na) => onChangeAction(i, na)}
                 onDelete={() => onDeleteAction(i)}
+                onMove={(to) => onReorder(i, to)}
                 onDrag={handleDrag} dragState={drag} />
             ))
           )}

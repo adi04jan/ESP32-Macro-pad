@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  font-src 'self' data:;
+  img-src 'self' data:;
+  connect-src 'self';" />
+<title>Macropad Overlay</title>
+<link rel="stylesheet" href="build/fonts.css" />
+<link rel="stylesheet" href="build/phosphor/bold/style.css" />
+<style>
+  :root {
+    --bg: rgba(17, 18, 26, 0.86);
+    --line: rgba(255, 255, 255, 0.07);
+    --cell: rgba(255, 255, 255, 0.035);
+    --text: #f2f3f8; --faint: #6a7180;
+    --accent: #6b9bff;
+  }
+  * { margin: 0; box-sizing: border-box; }
+  html, body { background: transparent; overflow: hidden; user-select: none;
+    font-family: "Hanken Grotesk", system-ui, sans-serif; color: var(--text);
+    -webkit-font-smoothing: antialiased; }
+  .wrap {
+    height: 100vh; display: flex; flex-direction: column;
+    background: var(--bg); border: 1px solid var(--line); border-radius: 14px;
+    backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05); overflow: hidden;
+  }
+  .bar {
+    -webkit-app-region: drag; display: flex; align-items: center; gap: 6px;
+    height: 26px; padding: 0 6px 0 11px;
+  }
+  .bar .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); flex: none; }
+  .bar .pname { flex: 1; font-size: 10px; letter-spacing: 0.02em; color: var(--faint);
+    font-family: "JetBrains Mono", monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar button { -webkit-app-region: no-drag; background: none; border: none; color: var(--faint); cursor: pointer;
+    width: 18px; height: 18px; border-radius: 5px; display: grid; place-items: center; font-size: 11px; flex: none; }
+  .bar button:hover { background: rgba(255,255,255,0.09); color: var(--text); }
+
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 1fr; gap: 4px; padding: 4px 7px 8px; flex: 1; }
+  .cell {
+    position: relative; border-radius: 9px; background: var(--cell);
+    display: flex; flex-direction: column; gap: 2px; padding: 5px 6px; overflow: hidden;
+    box-shadow: inset 0 0 0 1px var(--line); transition: background 0.12s, box-shadow 0.12s;
+  }
+  .cell.empty { background: transparent; box-shadow: none; }
+  .cell.flash { background: rgba(107,155,255,0.26); box-shadow: inset 0 0 0 1px var(--accent); }
+  .cell.unmapped { opacity: 0.45; }
+  .cell .top { display: flex; align-items: center; justify-content: space-between; }
+  .cell .n { font-family: "JetBrains Mono", monospace; font-size: 8.5px; font-weight: 700; color: var(--faint); }
+  .cell .led { width: 6px; height: 6px; border-radius: 50%; background: #2c2f3a; }
+  .cell .nm { font-size: 10.5px; font-weight: 600; line-height: 1.12; letter-spacing: -0.01em;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cell .dt { font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1.25; color: var(--faint);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; word-break: break-word; }
+  .cell.unmapped .nm { color: var(--faint); font-weight: 500; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="bar">
+      <span class="dot"></span>
+      <span class="pname" id="pname">—</span>
+      <button id="close" title="Hide overlay"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script src="build/data.js"></script>
+  <script src="widget.js"></script>
+</body>
+</html>

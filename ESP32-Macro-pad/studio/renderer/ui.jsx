@@ -4,11 +4,12 @@
 (function () {
   const { useState, useRef, useEffect, useLayoutEffect } = React;
 
-  const Icon = ({ name, w, className = "", style, onClick }) =>
-    React.createElement("i", {
-      className: `ph${w ? "-" + w : ""} ph-${name} ${className}`,
-      style, onClick,
-    });
+  // Phosphor's regular weight is the bare class `ph` (there is no `ph-regular`),
+  // so map regular/undefined -> "ph" and only suffix the real weights.
+  const Icon = ({ name, w, className = "", style, onClick }) => {
+    const weight = (!w || w === "regular") ? "ph" : `ph-${w}`;
+    return React.createElement("i", { className: `${weight} ph-${name} ${className}`, style, onClick });
+  };
 
   function Btn({ children, icon, variant = "", size = "", className = "", ...rest }) {
     const v = variant ? `btn-${variant}` : "";

@@ -6,8 +6,14 @@
   const { Icon, Btn, IconBtn, Select, Field, Panel, Toggle } = window.UI;
   const M = window.MACRO;
 
-  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onSync, onImport, onExport }) {
+  const SAVE_LABEL = { pending: "Editing…", saving: "Saving…", saved: "Saved ✓", error: "Save failed" };
+
+  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, saveStatus, onBackupAll }) {
     const portOpts = ports.length ? ports.map((p) => ({ value: p.path, label: p.label || p.path })) : [{ value: "", label: "No ports found" }];
+    const detected = isMacropad ? ports.find((p) => isMacropad(p)) : null;
+    const saveChip = saveStatus && saveStatus !== "idle"
+      ? <span className={`chip ${saveStatus === "saved" ? "accent" : saveStatus === "error" ? "" : ""}`}>{SAVE_LABEL[saveStatus] || ""}</span>
+      : null;
     const consoleRef = useRef(null);
     useEffect(() => {
       if (consoleRef.current) consoleRef.current.scrollTop = consoleRef.current.scrollHeight;
@@ -26,7 +32,17 @@
           <div className="col" style={{ gap: 18 }}>
             {/* connection */}
             <Panel title="Device" icon="usb" sub="Serial connection">
-              <Field label="Port">
+              <div className="row between mb8" style={{ alignItems: "center" }}>
+                <div>
+                  <div className="section-label">Auto-connect to macropad</div>
+                  <div className="mono fs12 faint">
+                    {detected ? `Found: ${detected.path}${detected.friendlyName ? " · " + detected.friendlyName : ""}`
+                              : "Macropad not detected"}
+                  </div>
+                </div>
+                <Toggle on={!!autoConnect} onChange={onToggleAutoConnect} />
+              </div>
+              <Field label="Port (manual override)">
                 <Select value={port} options={portOpts} onChange={setPort} />
               </Field>
               <div className="row" style={{ gap: 8, marginTop: 14 }}>
@@ -37,23 +53,26 @@
                 <IconBtn icon="arrow-clockwise" title="Refresh ports" onClick={onRefreshPorts} />
               </div>
               <div className={`conn-pill ${connected ? "on" : ""}`} style={{ marginTop: 14, width: "100%", justifyContent: "center" }}>
-                <span className="conn-dot" /> {connected ? "Live · " + port.split(" ")[0] : "Not connected"}
+                <span className="conn-dot" /> {connected ? "Live · " + port.split(" ")[0] : (autoConnect ? "Searching…" : "Not connected")}
               </div>
             </Panel>
 
             {/* profiles */}
-            <Panel title="Profiles" icon="stack" sub="3 slots on device">
+            <Panel title="Profiles" icon="stack" sub="Edit any slot · auto-saves live" right={saveChip}>
               <div className="profile-pills">
                 {[1, 2, 3].map((n) => (
-                  <button key={n} className={`profile-pill ${profile.active === n ? "active" : ""}`} onClick={() => onSetActive(n)}>
+                  <button key={n} className={`profile-pill ${profile.active === n ? "active" : ""}`} onClick={() => onSetActive(n)} title={connected ? `Edit profile ${n} (switches the device)` : `Edit profile ${n}`}>
                     <div className="pn">P{n}</div>
-                    <div className="pd">{profile.active === n ? "active" : "slot " + n}</div>
+                    <div className="pd">{profile.active === n ? "editing" : "slot " + n}</div>
                   </button>
                 ))}
               </div>
-              <div className="row" style={{ gap: 8, marginTop: 14 }}>
-                <Btn className="grow" size="sm" icon="download-simple" disabled={!connected} onClick={() => onSync("load")}>Load</Btn>
-                <Btn className="grow" size="sm" icon="upload-simple" variant="primary" disabled={!connected} onClick={() => onSync("save")}>Save to device</Btn>
+              <div className="mono fs12 faint" style={{ marginTop: 10 }}>
+                {connected ? "Edits save to the device automatically (~1.5s) with a PC backup before each save." : "Connect to edit live; changes auto-save when connected."}
+              </div>
+              <div className="row" style={{ gap: 8, marginTop: 12 }}>
+                <Btn className="grow" size="sm" icon="download-simple" disabled={!connected} onClick={onReload}>Reload</Btn>
+                <Btn className="grow" size="sm" icon="archive-box" disabled={!connected} onClick={onBackupAll}>Backup all</Btn>
               </div>
 
               <div className="divider" />
@@ -78,8 +97,8 @@
               </div>
               <div className="row gap14 wrap" style={{ marginTop: 14 }}>
                 <div className="grow"><Field label="Idle animation">
-                  <Select value={profile.idle_animation} options={["none", "breathe", "flash", "rainbow"]}
-                    onChange={(v) => onUpdateGlobal("idle_animation", v)} /></Field></div>
+                  <Select value={profile.idle_animation} options={M.IDLE_ANIMATIONS}
+                    onChange={(v) => (onSetIdle ? onSetIdle(v) : onUpdateGlobal("idle_animation", v))} /></Field></div>
                 <div className="grow"><Field label="Default delay (ms)">
                   <input className="input mono" type="number" value={profile.default_delay}
                     onChange={(e) => onUpdateGlobal("default_delay", parseInt(e.target.value || "0"))} /></Field></div>

@@ -42,6 +42,20 @@ function enumRef() {
     `MOUSE: ${schema.MOUSE_BUTTONS.join(", ")}`,
   ].join("\n");
 }
+// JSON schemas handed to providers' structured-output modes so the model is
+// constrained to valid JSON shapes at generation time (detailed action
+// validation still happens in code afterwards).
+const ACTION_OBJ = { type: "object", properties: { type: { type: "string" } }, required: ["type"] };
+function shortcutsSchema() {
+  return { type: "array", items: {
+    type: "object",
+    properties: { key_num: { type: "integer" }, description: { type: "string" }, actions: { type: "array", items: ACTION_OBJ } },
+    required: ["description", "actions"],
+  } };
+}
+function actionsSchema() { return { type: "array", items: ACTION_OBJ }; }
+function toArray(parsed) { return Array.isArray(parsed) ? parsed : (parsed && Array.isArray(parsed.actions) ? parsed.actions : []); }
+
 const RULES =
   "You generate macros for an ESP32 macropad.\n" +
   "- Respond with ONLY a raw JSON array. No prose, no markdown fences.\n" +
@@ -109,6 +123,12 @@ function validateShortcut(s) {
 }
 
 // ---- providers ------------------------------------------------------------
+// Pull a human-readable message out of an error response body.
+async function errBody(r) {
+  try { const j = JSON.parse(await r.text()); return (j.error && j.error.message) || JSON.stringify(j).slice(0, 200); }
+  catch (_) { return r.statusText || ""; }
+}
+
 async function callProvider(settings, system, user, jsonSchema) {
   const provider = settings.provider || "Ollama (Local)";
   const ctrl = AbortSignal.timeout ? AbortSignal.timeout(TIMEOUT_MS) : undefined;
@@ -120,16 +140,21 @@ async function callProvider(settings, system, user, jsonSchema) {
         messages: [{ role: "system", content: system }, { role: "user", content: user }],
         response_format: { type: "json_object" } }),
     });
-    if (!r.ok) throw new Error(`OpenAI HTTP ${r.status}`);
+    if (!r.ok) throw new Error(`OpenAI ${r.status}: ${await errBody(r)}`);
     return (await r.json()).choices[0].message.content;
   }
   if (provider.includes("Gemini")) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${settings.model || "gemini-1.5-flash"}:generateContent?key=${settings.key}`;
+    const model = settings.model || "gemini-2.5-flash";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.key}`;
     const r = await fetch(url, { method: "POST", signal: ctrl, headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ system_instruction: { parts: [{ text: system }] }, contents: [{ parts: [{ text: user }] }],
         generationConfig: { responseMimeType: "application/json" } }) });
-    if (!r.ok) throw new Error(`Gemini HTTP ${r.status}`);
-    return (await r.json()).candidates[0].content.parts[0].text;
+    if (!r.ok) throw new Error(`Gemini (${model}) ${r.status}: ${await errBody(r)}`);
+    const j = await r.json();
+    const text = j && j.candidates && j.candidates[0] && j.candidates[0].content &&
+      j.candidates[0].content.parts && j.candidates[0].content.parts[0] && j.candidates[0].content.parts[0].text;
+    if (text == null) throw new Error(`Gemini: empty response (${(j.candidates && j.candidates[0] && j.candidates[0].finishReason) || (j.promptFeedback && j.promptFeedback.blockReason) || "no content"})`);
+    return text;
   }
   // Ollama (default)
   const base = (settings.endpoint || settings.key || "http://localhost:11434").replace(/\/$/, "");
@@ -137,20 +162,20 @@ async function callProvider(settings, system, user, jsonSchema) {
   if (jsonSchema) body.format = jsonSchema;
   let r = await fetch(`${base}/api/generate`, { method: "POST", signal: ctrl, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   if (!r.ok && jsonSchema) { body.format = "json"; r = await fetch(`${base}/api/generate`, { method: "POST", signal: ctrl, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }); }
-  if (!r.ok) throw new Error(`Ollama HTTP ${r.status}`);
+  if (!r.ok) throw new Error(`Ollama ${r.status}: ${await errBody(r)}`);
   return (await r.json()).response || "";
 }
 
 // ---- public generators ----------------------------------------------------
 async function generateShortcuts(settings, { context, existing = [], count = 4, keyNums = null } = {}) {
-  const raw = await callProvider(settings, systemShortcuts(), userShortcuts(context, existing, count, keyNums), null);
+  const raw = await callProvider(settings, systemShortcuts(), userShortcuts(context, existing, count, keyNums), shortcutsSchema());
   let { valid, invalid } = partitionShortcuts(parseLenient(raw));
   if (invalid.length) {
     const errs = [...new Set(invalid.flatMap((x) => x.errors))];
     const repairUser = "Fix these validation errors and return ONLY the corrected JSON array.\nERRORS:\n" +
       errs.map((e) => "- " + e).join("\n") + "\n\nJSON:\n" + JSON.stringify(invalid.map((x) => x.item), null, 2);
     try {
-      const raw2 = await callProvider(settings, systemShortcuts(), repairUser, null);
+      const raw2 = await callProvider(settings, systemShortcuts(), repairUser, shortcutsSchema());
       valid = valid.concat(partitionShortcuts(parseLenient(raw2)).valid);
     } catch (_) {}
   }
@@ -161,9 +186,20 @@ async function generateShortcuts(settings, { context, existing = [], count = 4, 
 }
 
 async function generateActions(settings, description) {
-  const raw = await callProvider(settings, systemActions(), `Build a macro that does the following:\n${description}`, null);
-  const parsed = parseLenient(raw);
-  const actions = schema.repairActions(Array.isArray(parsed) ? parsed : (parsed && parsed.actions) || []);
+  const user = `Build a macro that does the following:\n${description}`;
+  const raw = await callProvider(settings, systemActions(), user, actionsSchema());
+  let actions = schema.repairActions(toArray(parseLenient(raw)));
+  // One targeted repair pass if the first attempt isn't valid.
+  if (!actions.length || !schema.isValidActions(actions)) {
+    const { errors } = schema.validateActions(actions.length ? actions : [{ type: "noop" }]);
+    const repairUser = "The previous attempt was invalid. Fix these errors and return ONLY a JSON array of action objects.\nERRORS:\n" +
+      (errors || ["invalid actions"]).map((e) => "- " + e).join("\n") + `\n\nTASK:\n${description}`;
+    try {
+      const raw2 = await callProvider(settings, systemActions(), repairUser, actionsSchema());
+      const a2 = schema.repairActions(toArray(parseLenient(raw2)));
+      if (a2.length && schema.isValidActions(a2)) actions = a2;
+    } catch (_) {}
+  }
   return actions.length && schema.isValidActions(actions) ? actions : [];
 }
 

@@ -399,6 +399,9 @@ textarea.input { height: auto; padding: 10px 12px; resize: vertical; line-height
    KEY EDITOR — device + keycaps
    ============================================================ */
 .editor-grid { display: grid; grid-template-columns: minmax(340px, 420px) 1fr; gap: 26px; align-items: start; }
+/* Grid items default to min-width:auto, which lets the builder column's content
+   push the grid wider than the page and get clipped. Allow the tracks to shrink. */
+.editor-grid > * { min-width: 0; }
 @media (max-width: 1000px) { .editor-grid { grid-template-columns: 1fr; } }
 
 .device-wrap { position: sticky; top: 4px; }
