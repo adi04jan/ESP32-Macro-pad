@@ -1,0 +1,24 @@
+__pycache__/
+*.pyc
+
+# Device backups are local-only: flash dumps are large, and profile dumps can
+# contain plaintext secrets (password-typing macros). Keep only the README.
+device_backups/*
+!device_backups/README.md
+
+# Electron app build artifacts and dependencies
+studio/node_modules/
+studio/renderer/build/
+studio/dist-build/
+
+# Arduino compile output
+build_out/
+# key_led_mapper compiled binaries (source lives in tools/key_led_mapper/)
+build_mapper/
+
+# runtime usage stats
+macropad_usage.json
+
+# Local user settings: holds the active COM port and AI provider endpoint/API
+# key. Runtime state, never committed. See macropad_settings.example.json.
+macropad_settings.json

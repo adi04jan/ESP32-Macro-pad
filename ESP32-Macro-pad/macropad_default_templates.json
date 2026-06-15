@@ -1,0 +1,3120 @@
+{
+  "global": [
+    {
+      "description": "Copy",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Paste",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "V"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Cut",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "X"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Undo",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "Z"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Redo",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "Y"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Select all",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Save",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Print",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "P"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Switch app",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "TAB"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Show desktop",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Lock PC",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Snip screenshot",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "LEFT_SHIFT",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "File Explorer",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Run dialog",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Settings",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Emoji picker",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "DOT"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Clipboard history",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "V"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Task view",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "TAB"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Close window",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "F4"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Rename",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F2"
+        }
+      ]
+    },
+    {
+      "description": "Refresh",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F5"
+        }
+      ]
+    },
+    {
+      "description": "New folder",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Minimize all",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "M"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Maximize window",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "UP_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Snap left",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "LEFT_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Snap right",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "RIGHT_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Virtual desktop right",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "LEFT_CTRL",
+            "RIGHT_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Virtual desktop left",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_GUI",
+            "LEFT_CTRL",
+            "LEFT_ARROW"
+          ]
+        }
+      ]
+    }
+  ],
+  "media": [
+    {
+      "description": "Play / pause",
+      "actions": [
+        {
+          "type": "media",
+          "value": "PLAY_PAUSE"
+        }
+      ]
+    },
+    {
+      "description": "Next track",
+      "actions": [
+        {
+          "type": "media",
+          "value": "NEXT"
+        }
+      ]
+    },
+    {
+      "description": "Previous track",
+      "actions": [
+        {
+          "type": "media",
+          "value": "PREVIOUS"
+        }
+      ]
+    },
+    {
+      "description": "Volume up",
+      "actions": [
+        {
+          "type": "media",
+          "value": "VOLUME_UP"
+        }
+      ]
+    },
+    {
+      "description": "Volume down",
+      "actions": [
+        {
+          "type": "media",
+          "value": "VOLUME_DOWN"
+        }
+      ]
+    },
+    {
+      "description": "Mute",
+      "actions": [
+        {
+          "type": "media",
+          "value": "MUTE"
+        }
+      ]
+    },
+    {
+      "description": "Stop",
+      "actions": [
+        {
+          "type": "media",
+          "value": "STOP"
+        }
+      ]
+    },
+    {
+      "description": "Mute mic",
+      "actions": [
+        {
+          "type": "telephony",
+          "value": "MIC_MUTE"
+        }
+      ]
+    }
+  ],
+  "chrome": [
+    {
+      "description": "New tab",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Close tab",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "W"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Reopen tab",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Next tab",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "TAB"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Previous tab",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "TAB"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Address bar",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Reload",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Hard reload",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find in page",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "History",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Downloads",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "J"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Bookmark page",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "DevTools",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F12"
+        }
+      ]
+    },
+    {
+      "description": "Incognito window",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Zoom in",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "EQUAL"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Zoom out",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "MINUS"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Reset zoom",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Fullscreen",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F11"
+        }
+      ]
+    },
+    {
+      "description": "New window",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Focus next pane",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F6"
+        }
+      ]
+    },
+    {
+      "description": "Save page",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Switch to tab 1",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Last tab",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "9"
+          ]
+        }
+      ]
+    }
+  ],
+  "vscode": [
+    {
+      "description": "Command palette",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "P"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Quick open file",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "P"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle sidebar",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle terminal",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "TILDE"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Format document",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_SHIFT",
+            "LEFT_ALT",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Go to definition",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F12"
+        }
+      ]
+    },
+    {
+      "description": "Peek definition",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "F12"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Rename symbol",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F2"
+        }
+      ]
+    },
+    {
+      "description": "Toggle comment",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "SLASH"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Replace",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find in files",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Save all",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "K"
+          ]
+        },
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Split editor",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "BACKSLASH"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Next editor",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "TAB"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Go to line",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Add cursor below",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_ALT",
+            "DOWN_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Select next match",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Move line up",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "UP_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Move line down",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "DOWN_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Copy line down",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_SHIFT",
+            "LEFT_ALT",
+            "DOWN_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Delete line",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle word wrap",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "Z"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Problems panel",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "M"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Source control",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Trigger suggest",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "SPACE"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Quick fix",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "DOT"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Fold region",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "LEFT_BRACE"
+          ]
+        }
+      ]
+    }
+  ],
+  "terminal": [
+    {
+      "description": "Git status",
+      "actions": [
+        {
+          "type": "text",
+          "value": "git status"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "Git pull",
+      "actions": [
+        {
+          "type": "text",
+          "value": "git pull"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "Git push",
+      "actions": [
+        {
+          "type": "text",
+          "value": "git push"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "Git add all",
+      "actions": [
+        {
+          "type": "text",
+          "value": "git add ."
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "Git log oneline",
+      "actions": [
+        {
+          "type": "text",
+          "value": "git log --oneline -10"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "npm install",
+      "actions": [
+        {
+          "type": "text",
+          "value": "npm install"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "npm run dev",
+      "actions": [
+        {
+          "type": "text",
+          "value": "npm run dev"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "npm run build",
+      "actions": [
+        {
+          "type": "text",
+          "value": "npm run build"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "Clear screen",
+      "actions": [
+        {
+          "type": "text",
+          "value": "clear"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "List files",
+      "actions": [
+        {
+          "type": "text",
+          "value": "ls"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "Up a directory",
+      "actions": [
+        {
+          "type": "text",
+          "value": "cd .."
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "Kill (Ctrl+C)",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "New tab",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Split pane",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "LEFT_SHIFT",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "docker ps",
+      "actions": [
+        {
+          "type": "text",
+          "value": "docker ps"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    },
+    {
+      "description": "Python venv",
+      "actions": [
+        {
+          "type": "text",
+          "value": "source .venv/bin/activate"
+        },
+        {
+          "type": "key",
+          "value": "ENTER"
+        }
+      ]
+    }
+  ],
+  "slack": [
+    {
+      "description": "Quick switcher",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Jump to channel",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Search",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Next unread",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "LEFT_SHIFT",
+            "DOWN_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Previous unread",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "LEFT_SHIFT",
+            "UP_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Mark all read",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_SHIFT",
+            "ESC"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Threads",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Direct messages",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Activity",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Edit last message",
+      "actions": [
+        {
+          "type": "key",
+          "value": "UP_ARROW"
+        }
+      ]
+    },
+    {
+      "description": "Toggle sidebar",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Set status",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "Y"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Create snippet",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "ENTER"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Upload file",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "U"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Bold text",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Italic text",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "I"
+          ]
+        }
+      ]
+    }
+  ],
+  "discord": [
+    {
+      "description": "Quick switcher",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Mark read",
+      "actions": [
+        {
+          "type": "key",
+          "value": "ESC"
+        }
+      ]
+    },
+    {
+      "description": "Toggle mute",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "M"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle deafen",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Next channel",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "DOWN_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Previous channel",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "UP_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Search",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Pin messages",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "P"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle members",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "U"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Emoji picker",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Upload file",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "U"
+          ]
+        }
+      ]
+    }
+  ],
+  "figma": [
+    {
+      "description": "Move tool",
+      "actions": [
+        {
+          "type": "key",
+          "value": "V"
+        }
+      ]
+    },
+    {
+      "description": "Frame tool",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F"
+        }
+      ]
+    },
+    {
+      "description": "Rectangle",
+      "actions": [
+        {
+          "type": "key",
+          "value": "R"
+        }
+      ]
+    },
+    {
+      "description": "Text",
+      "actions": [
+        {
+          "type": "key",
+          "value": "T"
+        }
+      ]
+    },
+    {
+      "description": "Pen",
+      "actions": [
+        {
+          "type": "key",
+          "value": "P"
+        }
+      ]
+    },
+    {
+      "description": "Comment",
+      "actions": [
+        {
+          "type": "key",
+          "value": "C"
+        }
+      ]
+    },
+    {
+      "description": "Components",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Group",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Ungroup",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Export",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Zoom to fit",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_SHIFT",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Zoom to selection",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_SHIFT",
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Duplicate",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle UI",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "BACKSLASH"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Outline view",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "O"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Mask",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_ALT",
+            "M"
+          ]
+        }
+      ]
+    }
+  ],
+  "excel": [
+    {
+      "description": "Sum cells",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "EQUAL"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Insert row",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "EQUAL"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Delete row",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "MINUS"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Fill down",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Fill right",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Format cells",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Bold",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Filter",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Insert chart",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "F1"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "New sheet",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_SHIFT",
+            "F11"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Go to",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Edit cell",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F2"
+        }
+      ]
+    },
+    {
+      "description": "Save",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Paste special",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_ALT",
+            "V"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Select column",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "SPACE"
+          ]
+        }
+      ]
+    }
+  ],
+  "word": [
+    {
+      "description": "Bold",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Italic",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Underline",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "U"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Save",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Find",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Replace",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Heading 1",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_ALT",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Heading 2",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_ALT",
+            "2"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Bullet list",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Center",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Left align",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Print",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "P"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Word count",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Insert hyperlink",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Select all",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "A"
+          ]
+        }
+      ]
+    }
+  ],
+  "outlook": [
+    {
+      "description": "New mail",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Send",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "ENTER"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Reply",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Reply all",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Forward",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Search",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Mark read",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "Q"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Delete",
+      "actions": [
+        {
+          "type": "key",
+          "value": "DELETE"
+        }
+      ]
+    },
+    {
+      "description": "New meeting",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "Q"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Flag",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Go to inbox",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Next item",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "DOT"
+          ]
+        }
+      ]
+    }
+  ],
+  "explorer": [
+    {
+      "description": "New folder",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Rename",
+      "actions": [
+        {
+          "type": "key",
+          "value": "F2"
+        }
+      ]
+    },
+    {
+      "description": "Copy",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "C"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Paste",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "V"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Cut",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "X"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Delete",
+      "actions": [
+        {
+          "type": "key",
+          "value": "DELETE"
+        }
+      ]
+    },
+    {
+      "description": "Address bar",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Search",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "F"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Up one level",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "UP_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Back",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "LEFT_ARROW"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Properties",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "ENTER"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Select all",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "New window",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "N"
+          ]
+        }
+      ]
+    }
+  ],
+  "photoshop": [
+    {
+      "description": "Move tool",
+      "actions": [
+        {
+          "type": "key",
+          "value": "V"
+        }
+      ]
+    },
+    {
+      "description": "Brush",
+      "actions": [
+        {
+          "type": "key",
+          "value": "B"
+        }
+      ]
+    },
+    {
+      "description": "Marquee",
+      "actions": [
+        {
+          "type": "key",
+          "value": "M"
+        }
+      ]
+    },
+    {
+      "description": "Lasso",
+      "actions": [
+        {
+          "type": "key",
+          "value": "L"
+        }
+      ]
+    },
+    {
+      "description": "Eyedropper",
+      "actions": [
+        {
+          "type": "key",
+          "value": "I"
+        }
+      ]
+    },
+    {
+      "description": "Undo",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "Z"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "New layer",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Group layers",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Flatten",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Deselect",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "D"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Save",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Save as",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Export",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_ALT",
+            "LEFT_SHIFT",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Fit on screen",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "0"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Free transform",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "T"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Fill",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_SHIFT",
+            "F5"
+          ]
+        }
+      ]
+    }
+  ],
+  "spotify": [
+    {
+      "description": "Play / pause",
+      "actions": [
+        {
+          "type": "media",
+          "value": "PLAY_PAUSE"
+        }
+      ]
+    },
+    {
+      "description": "Next track",
+      "actions": [
+        {
+          "type": "media",
+          "value": "NEXT"
+        }
+      ]
+    },
+    {
+      "description": "Previous track",
+      "actions": [
+        {
+          "type": "media",
+          "value": "PREVIOUS"
+        }
+      ]
+    },
+    {
+      "description": "Volume up",
+      "actions": [
+        {
+          "type": "media",
+          "value": "VOLUME_UP"
+        }
+      ]
+    },
+    {
+      "description": "Volume down",
+      "actions": [
+        {
+          "type": "media",
+          "value": "VOLUME_DOWN"
+        }
+      ]
+    },
+    {
+      "description": "Mute",
+      "actions": [
+        {
+          "type": "media",
+          "value": "MUTE"
+        }
+      ]
+    },
+    {
+      "description": "Search",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "L"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Like song",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "LEFT_SHIFT",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Repeat",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Shuffle",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "S"
+          ]
+        }
+      ]
+    }
+  ],
+  "notion": [
+    {
+      "description": "New page",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Search",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "P"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Bold",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "B"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Italic",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Checkbox",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle list",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "7"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Heading 1",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "1"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Code block",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "9"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Indent",
+      "actions": [
+        {
+          "type": "key",
+          "value": "TAB"
+        }
+      ]
+    },
+    {
+      "description": "Outdent",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_SHIFT",
+            "TAB"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle sidebar",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "BACKSLASH"
+          ]
+        }
+      ]
+    }
+  ],
+  "teams": [
+    {
+      "description": "Mute mic",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "M"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Toggle video",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "O"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Share screen",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Raise hand",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "K"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "New chat",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "N"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Search",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "E"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Calls",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "5"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Files",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "6"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Go to",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "G"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Leave call",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_CTRL",
+            "LEFT_SHIFT",
+            "H"
+          ]
+        }
+      ]
+    }
+  ],
+  "zoom": [
+    {
+      "description": "Mute / unmute",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "A"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Start / stop video",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "V"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Share screen",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "S"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Chat",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "H"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Raise hand",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "Y"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Record",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "R"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Gallery view",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "F2"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Leave meeting",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "Q"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Invite",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "I"
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Full screen",
+      "actions": [
+        {
+          "type": "keycombo",
+          "keys": [
+            "LEFT_ALT",
+            "F"
+          ]
+        }
+      ]
+    }
+  ]
+}

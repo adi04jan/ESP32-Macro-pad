@@ -1,20 +1,20 @@
 {
-    "profile_name": "Linux Power Tools",
-    "idle_animation": "breathe",
+    "profile_name": "Git Power Workflow",
+    "idle_animation": "rainbow",
     "default_delay": 20,
     "keys": [
         {
             "id": 1,
-            "name": "tail syslog",
+            "name": "git pull",
             "led_color": [
                 0,
-                255,
-                0
+                120,
+                255
             ],
             "actions": [
                 {
                     "type": "text",
-                    "value": "tail -f /var/log/syslog"
+                    "value": "git pull "
                 },
                 {
                     "type": "key",
@@ -24,16 +24,16 @@
         },
         {
             "id": 2,
-            "name": "dmesg -w",
+            "name": "git fetch",
             "led_color": [
-                30,
-                255,
-                30
+                0,
+                150,
+                255
             ],
             "actions": [
                 {
                     "type": "text",
-                    "value": "dmesg -w"
+                    "value": "git fetch -a "
                 },
                 {
                     "type": "key",
@@ -43,65 +43,82 @@
         },
         {
             "id": 3,
-            "name": "grep errors",
+            "name": "git checkout -b ",
             "led_color": [
-                50,
-                255,
-                50
+                0,
+                180,
+                255
             ],
             "actions": [
                 {
                     "type": "text",
-                    "value": "egrep -i 'error|fail|critical'"
+                    "value": "git checkout -b "
                 }
             ]
         },
         {
             "id": 4,
-            "name": "jq pretty",
+            "name": "Copy",
             "led_color": [
-                80,
-                255,
-                80
+                0,
+                180,
+                255
             ],
             "actions": [
                 {
-                    "type": "text",
-                    "value": "jq '.'"
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "C"
+                    ]
                 }
             ]
         },
         {
             "id": 5,
-            "name": "ip addr",
+            "name": "Paste",
             "led_color": [
-                100,
-                255,
-                100
+                0,
+                220,
+                220
             ],
             "actions": [
                 {
-                    "type": "text",
-                    "value": "ip a"
-                },
-                {
-                    "type": "key",
-                    "value": "ENTER"
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_CTRL",
+                        "V"
+                    ]
                 }
             ]
         },
         {
             "id": 6,
-            "name": "ip route",
+            "name": "git checkout",
             "led_color": [
-                120,
+                0,
                 255,
-                120
+                200
             ],
             "actions": [
                 {
                     "type": "text",
-                    "value": "ip route"
+                    "value": "git checkout "
+                }
+            ]
+        },
+        {
+            "id": 7,
+            "name": "resolve conflicts",
+            "led_color": [
+                255,
+                120,
+                0
+            ],
+            "actions": [
+                {
+                    "type": "text",
+                    "value": "git mergetool --tool=vimdiff"
                 },
                 {
                     "type": "key",
@@ -110,32 +127,17 @@
             ]
         },
         {
-            "id": 7,
-            "name": "restart svc",
+            "id": 8,
+            "name": "git diff",
             "led_color": [
-                150,
-                255,
+                0,
+                200,
                 150
             ],
             "actions": [
                 {
                     "type": "text",
-                    "value": "sudo systemctl restart "
-                }
-            ]
-        },
-        {
-            "id": 8,
-            "name": "journalctl",
-            "led_color": [
-                180,
-                255,
-                180
-            ],
-            "actions": [
-                {
-                    "type": "text",
-                    "value": "journalctl -xe"
+                    "value": "git diff"
                 },
                 {
                     "type": "key",
@@ -145,73 +147,69 @@
         },
         {
             "id": 9,
-            "name": "NMEA lat/lon",
+            "name": "git rebase -i ",
             "led_color": [
-                0,
-                200,
-                0
+                50,
+                255,
+                220
             ],
             "actions": [
                 {
-                    "type": "multiline",
-                    "value": "grep GPRMC log.txt | awk -F',' '{print \"lat=\" $4 \", lon=\" $6}'"
-                },
-                {
-                    "type": "key",
-                    "value": "ENTER"
+                    "type": "text",
+                    "value": "git rebase -i "
                 }
             ]
         },
         {
             "id": 10,
-            "name": "route reload",
+            "name": "git log",
             "led_color": [
                 0,
-                255,
-                140
+                150,
+                180
             ],
             "actions": [
                 {
-                    "type": "multiline",
-                    "value": "ip route del 172.203.113.16\nip route add 172.203.113.16 dev wlan0"
+                    "type": "text",
+                    "value": "git log --oneline --graph --decorate"
+                },
+                {
+                    "type": "key",
+                    "value": "ENTER"
                 }
             ]
         },
         {
             "id": 11,
-            "name": "screen -r",
+            "name": "Play/Pause",
             "led_color": [
-                50,
-                255,
-                150
+                80,
+                220,
+                255
             ],
             "actions": [
                 {
-                    "type": "text",
-                    "value": "screen -r"
-                },
-                {
-                    "type": "key",
-                    "value": "ENTER"
+                    "type": "media",
+                    "value": "PLAY_PAUSE"
                 }
             ]
         },
         {
             "id": 12,
-            "name": "clear",
+            "name": "Mic Mute (System)",
             "led_color": [
+                255,
                 0,
-                150,
                 0
             ],
             "actions": [
                 {
-                    "type": "text",
-                    "value": "clear"
-                },
-                {
-                    "type": "key",
-                    "value": "ENTER"
+                    "type": "keycombo",
+                    "keys": [
+                        "LEFT_GUI",
+                        "LEFT_ALT",
+                        "K"
+                    ]
                 }
             ]
         }

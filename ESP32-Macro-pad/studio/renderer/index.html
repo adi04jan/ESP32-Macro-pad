@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  font-src 'self' data:;
+  img-src 'self' data:;
+  connect-src 'self';" />
+<title>Macropad Studio</title>
+
+<!-- Vendored offline assets (generated into build/ by build.js) -->
+<link rel="stylesheet" href="build/fonts.css" />
+<link rel="stylesheet" href="build/phosphor/regular/style.css" />
+<link rel="stylesheet" href="build/phosphor/bold/style.css" />
+<link rel="stylesheet" href="build/phosphor/fill/style.css" />
+
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+  (function () {
+    function on() { document.documentElement.classList.add("anim-on"); }
+    if (document.visibilityState === "visible") requestAnimationFrame(on);
+    else document.addEventListener("visibilitychange", function h() {
+      if (document.visibilityState === "visible") { on(); document.removeEventListener("visibilitychange", h); }
+    });
+  })();
+</script>
+
+<!-- Vendored runtime (offline) -->
+<script src="vendor/react.js"></script>
+<script src="vendor/react-dom.js"></script>
+
+<!-- Pre-transformed renderer (built by build.js) -->
+<script src="build/data.js"></script>
+<script src="build/ledsim.js"></script>
+<script src="build/ui.js"></script>
+<script src="build/ActionBuilder.js"></script>
+<script src="build/KeyEditor.js"></script>
+<script src="build/Dashboard.js"></script>
+<script src="build/AutoSwitcher.js"></script>
+<script src="build/Settings.js"></script>
+<script src="build/CommandPalette.js"></script>
+<script src="build/App.js"></script>
+</body>
+</html>

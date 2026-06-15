@@ -1,0 +1,67 @@
+{
+  "name": "macropad-studio",
+  "productName": "Macropad Studio",
+  "version": "2.0.0",
+  "description": "Configurator for the ESP32-S2 macropad — device sync + local-AI macro generation.",
+  "main": "main.js",
+  "author": "adi04jan",
+  "license": "MIT",
+  "scripts": {
+    "start": "node build.js && electron .",
+    "build": "node build.js",
+    "rebuild": "electron-rebuild -f -w serialport",
+    "postinstall": "electron-rebuild -f -w serialport || echo skip-rebuild",
+    "dist": "node build.js && electron-builder --win"
+  },
+  "build": {
+    "appId": "com.adi04jan.macropadstudio",
+    "productName": "Macropad Studio",
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/serialport/**",
+      "**/node_modules/@serialport/**"
+    ],
+    "files": [
+      "main.js",
+      "preload.js",
+      "widget-preload.js",
+      "renderer/**/*",
+      "services/**/*",
+      "!**/*.map",
+      "!renderer/*.jsx"
+    ],
+    "extraResources": [
+      {
+        "from": "../macropad_default_templates.json",
+        "to": "macropad_default_templates.json"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "artifactName": "${productName}-${version}-setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Macropad Studio"
+    },
+    "directories": {
+      "output": "dist-build"
+    }
+  },
+  "dependencies": {
+    "serialport": "^13.0.0"
+  },
+  "devDependencies": {
+    "@electron/rebuild": "^4.0.4",
+    "@fontsource/hanken-grotesk": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@fontsource/space-grotesk": "^5.2.10",
+    "@phosphor-icons/web": "^2.1.2",
+    "electron": "^42.3.3",
+    "electron-builder": "^26.15.2"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ai_provider": "Ollama (Local)",
+  "ai_endpoint": "http://localhost:11434",
+  "ai_key": "",
+  "ai_model": "llama3:latest",
+  "widget_alpha": 0.82,
+  "auto_switch_enabled": false,
+  "ai_debug_enabled": false,
+  "last_port": ""
+}
