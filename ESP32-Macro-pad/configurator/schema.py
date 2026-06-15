@@ -73,7 +73,7 @@ MEDIA_NAMES = [
 TELEPHONY_NAMES = ["MIC_MUTE", "ANSWER", "DECLINE"]
 MOUSE_BUTTONS = ["LEFT", "RIGHT", "MIDDLE"]
 LED_ANIM_VALUES = ["flash", "breathe"]
-IDLE_ANIMATIONS = ["none", "breathe", "rainbow", "flash"]
+IDLE_ANIMATIONS = ["none", "breathe", "rainbow", "flash", "wave", "comet", "twinkle", "ripple"]
 
 ACTION_TYPES = [
     "comment", "delay", "key", "keycombo", "text", "multiline",

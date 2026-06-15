@@ -2,6 +2,7 @@
 #include "config.h"
 #include "storage.h"
 #include "profiles.h"
+#include "leds.h"
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 
@@ -52,7 +53,24 @@ static void cliHandleLine(const String &line) {
   arg.trim();
 
   if (cmd == "help") {
-    Serial.println("help ls cat <f> setprofile <n> setkey <id> <json> status fsinfo reboot");
+    Serial.println("help ls cat <f> setprofile <n> setkey <id> <json> setled <k> <r> <g> <b> setidle <name> status fsinfo reboot");
+  } else if (cmd == "setled") {
+    // Live per-key resting colour (not persisted until a profile is saved).
+    int k, r, g, b;
+    if (sscanf(arg.c_str(), "%d %d %d %d", &k, &r, &g, &b) == 4 && k >= 1 && k <= NUM_KEYS) {
+      auto cl = [](int v) { return (uint8_t)(v < 0 ? 0 : v > 255 ? 255 : v); };
+      ledsSetKeyBase(k - 1, cl(r), cl(g), cl(b));
+      Serial.printf("led %d set\n", k);
+    } else {
+      Serial.println("setled <key 1-12> <r> <g> <b>");
+    }
+  } else if (cmd == "setidle") {
+    // Live idle animation (not persisted until a profile is saved).
+    LedIdleMode m = ledsModeFromName(arg.c_str());
+    ledsSetIdleMode(m);
+    idleAnimation = (int)m;   // keep the status readout in sync
+    Serial.printf("EVT:IDLE %s\n", ledsModeName(m));
+    Serial.printf("idle %s\n", ledsModeName(m));
   } else if (cmd == "fsinfo") {
     Serial.printf("FS_INFO:%u,%u\n", (unsigned)LittleFS.totalBytes(), (unsigned)LittleFS.usedBytes());
   } else if (cmd == "ls") {
@@ -67,8 +85,9 @@ static void cliHandleLine(const String &line) {
   } else if (cmd == "setkey") {
     cmdSetkey(arg);
   } else if (cmd == "status") {
-    Serial.printf("Profile:%d loaded:%d idle:%d ver:%s\n",
-                  currentProfile, profileLoaded, idleAnimation, FW_VERSION);
+    Serial.printf("Profile:%d loaded:%d idle:%d mode:%s ver:%s\n",
+                  currentProfile, profileLoaded, idleAnimation,
+                  ledsModeName(ledsGetIdleMode()), FW_VERSION);
   } else if (cmd == "reboot") {
     Serial.println("rebooting"); delay(200); ESP.restart();
   } else {

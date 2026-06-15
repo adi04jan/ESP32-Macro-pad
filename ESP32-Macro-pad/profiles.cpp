@@ -55,14 +55,22 @@ bool loadProfile(int id) {
   profileLoaded = true;
   currentProfile = id;
 
+  // Mirror LedIdleMode for the status readout (rendering itself is driven by
+  // leds.cpp via ledsApplyProfile()).
   const char *anim = profileDoc["idle_animation"] | "none";
-  if (strcmp(anim, "breathe") == 0) idleAnimation = 1;
+  if      (strcmp(anim, "breathe") == 0) idleAnimation = 1;
   else if (strcmp(anim, "rainbow") == 0) idleAnimation = 2;
+  else if (strcmp(anim, "wave")    == 0) idleAnimation = 3;
+  else if (strcmp(anim, "comet")   == 0) idleAnimation = 4;
+  else if (strcmp(anim, "twinkle") == 0) idleAnimation = 5;
+  else if (strcmp(anim, "ripple")  == 0) idleAnimation = 6;
   else idleAnimation = 0;
 
   Serial.printf("Loaded profile %d (%s)\n", id,
                 profileDoc["profile_name"] | "unnamed");
   updateProfileLEDs();
   ledsApplyProfile();   // per-key resting colours + idle animation
+  Serial.printf("EVT:PROFILE %d\n", currentProfile);                 // tell the app the active slot changed
+  Serial.printf("EVT:IDLE %s\n", ledsModeName(ledsGetIdleMode()));   // sync the app's mirror
   return true;
 }

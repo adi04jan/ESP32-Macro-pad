@@ -6,7 +6,7 @@
 extern JsonDocument profileDoc;   // ArduinoJson 7 elastic document
 extern bool profileLoaded;
 extern int  currentProfile;       // 1..NUM_PROFILES
-extern int  idleAnimation;        // 0 none, 1 breathe, 2 rainbow
+extern int  idleAnimation;        // mirrors LedIdleMode: 0 none,1 breathe,2 rainbow,3 wave,4 comet,5 twinkle,6 ripple
 
 bool ensureDefaultProfile(int id);
 bool loadProfile(int id);

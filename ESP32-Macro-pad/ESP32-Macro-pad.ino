@@ -39,6 +39,12 @@ void setup() {
   ledsBegin();
   inputBegin();
 
+  // Advertise a stable, recognisable USB identity so the Studio app can
+  // auto-detect this device by VID/PID regardless of its COM-port number.
+  USB.VID(USB_VID);
+  USB.PID(USB_PID);
+  USB.manufacturerName(USB_MANUFACTURER);
+  USB.productName(USB_PRODUCT);
   USB.begin();
   delay(10);
   hidBegin();
