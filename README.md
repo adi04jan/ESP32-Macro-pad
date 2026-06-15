@@ -8,6 +8,9 @@ configurator with local-first AI macro generation.
 > **v2** — modular non-blocking firmware (ArduinoJson 7) + **Macropad Studio**,
 > an Electron desktop app that replaces the old CustomTkinter configurator.
 
+<img width="712" height="560" alt="ESP32 Macropad" src="https://github.com/user-attachments/assets/45e009f4-ea78-450a-b862-cfce8e7b1cef" />
+<img width="709" height="698" alt="Macropad Studio" src="https://github.com/user-attachments/assets/0003f9b6-e20b-4d1a-904a-aaf0c55a2186" />
+
 ## Features
 
 - **12 mechanical keys**, each able to run a sequence of any of 16 action types:
