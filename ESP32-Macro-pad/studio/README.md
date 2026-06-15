@@ -1,14 +1,16 @@
 # Macropad Studio
 
-The desktop configurator for the ESP32-S2 macropad — an Electron app built from
-the `APP_assets` "Macropad Studio" design. Real device sync over serial and
-local-first AI macro generation, with every generated/edited macro validated
-against the canonical action schema before it can reach the device.
+The desktop configurator for the ESP32-S2 macropad — an Electron app with real
+device sync over serial and local-first AI macro generation, with every
+generated/edited macro validated against the canonical action schema before it
+can reach the device.
+
+> Full documentation: [`../docs/studio.md`](../docs/studio.md).
 
 ## Architecture
 
 ```
-renderer/ (React UI, from APP_assets)
+renderer/ (React UI)
     │  window.api  (preload.js, contextIsolation)
     ▼
 main.js (Electron main)
@@ -22,8 +24,8 @@ main.js (Electron main)
 
 The renderer is plain React (no framework build): `build.js` pre-transforms the
 JSX to JS with the vendored Babel so Electron can load it over `file://`. React,
-ReactDOM and Babel are vendored in `renderer/vendor/` (offline); the Phosphor
-icon font and Google Fonts load from CDN.
+ReactDOM and Babel are vendored in `renderer/vendor/`; the Phosphor icon font and
+the web fonts are vendored into the build output too, so the app is fully offline.
 
 ## Run (development)
 
@@ -44,7 +46,7 @@ npm run dist           # electron-builder -> studio/dist-build/
 
 ## Using it
 
-- **Device** tab: pick the COM port (the macropad enumerates as `303A:80C2`),
+- **Device** tab: pick the COM port (the macropad enumerates as `303A:80C5`),
   Connect, then Load / Save profiles and watch the live console + flash gauge.
 - **Key Editor**: click a key, build its action sequence (all 16 action types),
   drag to reorder, "Test" pushes the key live when connected.

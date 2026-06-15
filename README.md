@@ -1,52 +1,76 @@
-# ESP32-Macro-pad
-ESP32 S2 lolin mini powered Macro pad, Inspired by Work Louder Creator Micro but for programmer
+# ESP32 Macro-pad
 
-### 12-Key Programmable Macropad • JSON Profiles • Touch Switching • RGB WS2812 • HID Keyboard/Mouse
+ESP32-S2 (LOLIN S2 Pico) powered macropad — inspired by the Work Louder Creator
+Micro, but built for programmers. **12 programmable keys, 12 WS2812 RGB LEDs,
+USB HID, 3 JSON profiles, capacitive-touch profile switching**, and a desktop
+configurator with local-first AI macro generation.
 
-A fully-customizable **ESP32-S2 (LOLIN S2 Pico)** macropad featuring:
+> **v2** — modular non-blocking firmware (ArduinoJson 7) + **Macropad Studio**,
+> an Electron desktop app that replaces the old CustomTkinter configurator.
 
-- **12 mechanical keys**
-- **12 WS2812 RGB LEDs**
-- **USB HID Keyboard + Mouse + Media Keys**
-- **3 user profiles**
-- **Touch-pads for profile switching**
-- **JSON-based macro configuration**
-- **Serial CLI for updating profiles**
+## Features
 
-Designed for **Git / Linux / development workflows**.
+- **12 mechanical keys**, each able to run a sequence of any of 16 action types:
+  keypress, combo, text, multiline script, mouse move/click, media & telephony
+  keys, delays, repeat loops, hold/release, per-key LED colour, and profile
+  switching.
+- **12 WS2812 RGB LEDs** driven by a frame-based (~60 FPS) non-blocking engine:
+  per-key colours, press highlights, and idle animations (breathe, rainbow,
+  wave, comet, twinkle, ripple).
+- **USB HID** keyboard + mouse + media + telephony composite device.
+- **3 user profiles** stored on LittleFS, switchable from **2 capacitive touch
+  pads** (next / previous / hold-to-reset).
+- **Serial CLI** for diagnostics and live edits, plus a JSON upload protocol.
+- **Macropad Studio** desktop app: device sync, a visual key editor with a live
+  LED simulation, an always-on-top key overlay, and AI macro generation
+  (Ollama / OpenAI / Gemini) where every macro is schema-validated before it
+  reaches the device.
 
----
+## Repository layout
 
-## ⭐ Features
+```
+ESP32-Macro-pad/
+├── ESP32-Macro-pad.ino, *.cpp/*.h   firmware (modular, non-blocking)
+├── config.h                          board/build configuration
+├── data/profile{1,2,3}.json          example profiles
+├── configurator/                     Python package: canonical action schema + tooling
+├── tests/                            Python test suite for the schema/tooling
+├── studio/                           Macropad Studio (Electron desktop app)
+├── tools/key_led_mapper/             firmware diagnostic sketch
+└── docs/                             full documentation (start here)
+```
 
-### 🔵 Macro Capabilities per Key
-Each key can trigger any of the following:
+## Quick start
 
-- Single keypress  
-- Key combos (CTRL + SHIFT + R)  
-- Multi-line scripts / commands  
-- Text blocks  
-- Mouse actions (move/click)  
-- Media keys (volume, play/pause)  
-- Delays, loops, hold/release  
-- LED effects  
-- Profile switching  
+**Flash the firmware** — open `ESP32-Macro-pad/ESP32-Macro-pad.ino` in the
+Arduino IDE for a LOLIN S2 Pico (Arduino-ESP32 3.2.x, ArduinoJson 7, USB-OTG /
+TinyUSB mode). See [docs/firmware.md](ESP32-Macro-pad/docs/firmware.md).
 
-### 🌈 Lighting
-- Per-key RGB  
-- Flash animation  
-- Breathe animation  
-- Optional idle animation  
+**Configure it** — install Macropad Studio (grab the
+`Macropad Studio-<version>-setup.exe` from the
+[Releases](../../releases) page) or run it from source:
 
-### 🟢 Profile Switching
-2 capacitive touch pads:
+```sh
+cd ESP32-Macro-pad/studio
+npm install
+npm start
+```
 
-| Touch Pad | Function |
-|-----------|----------|
-| GPIO2 | Next Profile |
-| GPIO3 | Previous Profile |
-| Both (3 sec hold) | Reset profile |
+## Documentation
 
-### 🔧 Serial CLI
-Built-in command-line for diagnostics & file editing:
+Full docs live in [`ESP32-Macro-pad/docs/`](ESP32-Macro-pad/docs/):
 
+- [Firmware](ESP32-Macro-pad/docs/firmware.md) — architecture, pin map, serial CLI, build & flash
+- [Configuration](ESP32-Macro-pad/docs/configuration.md) — profile/settings formats and the action schema
+- [Macropad Studio](ESP32-Macro-pad/docs/studio.md) — the desktop app
+- [Build & Release](ESP32-Macro-pad/docs/build-and-release.md) — installer + GitHub release
+
+## Hardware
+
+LOLIN S2 Pico (ESP32-S2) · 12 mechanical switches · 12 WS2812 RGB LEDs · 2
+capacitive touch pads. USB identity `303A:80C5`. Full pin map in
+[`config.h`](ESP32-Macro-pad/config.h).
+
+## License
+
+MIT.
