@@ -83,9 +83,35 @@
                 <Btn size="sm" variant="danger" icon="trash">Factory reset</Btn>
               </div>
             </Panel>
+
+            <Panel title="About" icon="info" sub="Macropad Studio">
+              <div className="row between">
+                <span className="fs13 fw600">Macropad Studio</span>
+                <span className="mono fs12 faint">v2.0.0</span>
+              </div>
+              <span className="fs12 faint">Configurator for the ESP32-S2 macropad — device sync + local-AI macro generation.</span>
+              <div className="divider" />
+              <span className="fs12 faint">Developed by</span>
+              <div className="fs13 fw600" style={{ marginTop: 2 }}>Aditya Biswas</div>
+              <div className="row" style={{ gap: 8, marginTop: 12 }}>
+                <Link href="https://github.com/adi04jan" icon="github-logo">GitHub</Link>
+                <Link href="https://www.linkedin.com/in/aditya-biswas-6409b78b/" icon="linkedin-logo">LinkedIn</Link>
+              </div>
+            </Panel>
           </div>
         </div>
       </div>
+    );
+  }
+
+  function Link({ href, icon, children }) {
+    return (
+      <a href={href} target="_blank" rel="noreferrer"
+        style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 13px",
+          borderRadius: 10, background: "var(--surface-2, #16161f)", color: "var(--text, #e8e8ef)",
+          textDecoration: "none", fontSize: 13, fontWeight: 600, border: "1px solid var(--border, #262634)" }}>
+        <Icon name={icon} w="bold" /> {children}
+      </a>
     );
   }
 

@@ -74,6 +74,13 @@ LOLIN S2 Pico (ESP32-S2) · 12 mechanical switches · 12 WS2812 RGB LEDs · 2
 capacitive touch pads. USB identity `303A:80C5`. Full pin map in
 [`config.h`](ESP32-Macro-pad/config.h).
 
+## Developer
+
+**Aditya Biswas**
+
+- GitHub: [@adi04jan](https://github.com/adi04jan)
+- LinkedIn: [aditya-biswas](https://www.linkedin.com/in/aditya-biswas-6409b78b/)
+
 ## License
 
-MIT.
+MIT © Aditya Biswas.

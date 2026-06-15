@@ -3,9 +3,12 @@
 
 "use strict";
 
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, Tray, Menu, nativeImage, shell } = require("electron");
 const path = require("path");
 const fs = require("fs");
+
+const ICON = path.join(__dirname, "assets", "icon.ico");
+const TRAY_ICON = path.join(__dirname, "assets", "tray.png");
 
 const schema = require("./services/schema");
 const store = require("./services/store");
@@ -17,6 +20,8 @@ const { SerialLink, stripCatEcho } = require("./services/serial");
 
 const link = new SerialLink();
 let win = null;
+let tray = null;                 // system-tray icon (close minimizes here)
+let trayHintShown = false;       // one-time "still running" balloon
 let widgetWin = null;            // always-on-top key overlay
 let widgetProfile = null;        // last profile pushed from the main window
 let currentContext = "global";   // focused-app context (from window detection)
@@ -62,10 +67,28 @@ link.on("file", (lines) => {
 function createWindow() {
   win = new BrowserWindow({
     width: 1320, height: 880, minWidth: 1080, minHeight: 720,
-    backgroundColor: "#0b0b0f", title: "Macropad Studio",
+    backgroundColor: "#0b0b0f", title: "Macropad Studio", icon: ICON,
     webPreferences: { preload: path.join(__dirname, "preload.js"), contextIsolation: true, nodeIntegration: false },
   });
   win.removeMenu();
+
+  // External links (About, etc.) open in the system browser, never in-app.
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//.test(url)) shell.openExternal(url);
+    return { action: "deny" };
+  });
+
+  // Closing the window hides it to the tray instead of quitting; the app keeps
+  // running (serial + overlay) until "Quit" is chosen from the tray.
+  win.on("close", (e) => {
+    if (app.isQuitting) return;
+    e.preventDefault();
+    win.hide();
+    if (!trayHintShown && tray) {
+      trayHintShown = true;
+      try { tray.displayBalloon({ title: "Macropad Studio", content: "Still running in the tray. Right-click the icon to quit." }); } catch (_) {}
+    }
+  });
   win.webContents.on("console-message", (_e, level, message, line, src) => {
     if (level >= 2) console.error(`[renderer] ${message} (${src}:${line})`);
   });
@@ -102,14 +125,36 @@ function toggleWidget() {
   return true;
 }
 
+// Bring the main window back from the tray (or recreate it if it was destroyed).
+function showMain() {
+  if (!win || win.isDestroyed()) { createWindow(); return; }
+  if (win.isMinimized()) win.restore();
+  win.show();
+  win.focus();
+}
+
+// System-tray icon: keeps the app alive after the window is closed.
+function createTray() {
+  if (tray) return;
+  const img = nativeImage.createFromPath(TRAY_ICON);
+  tray = new Tray(img.isEmpty() ? ICON : TRAY_ICON);
+  tray.setToolTip("Macropad Studio");
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: "Show Macropad Studio", click: showMain },
+    { label: "Toggle Overlay", click: () => toggleWidget() },
+    { type: "separator" },
+    { label: "Quit", click: () => { app.isQuitting = true; app.quit(); } },
+  ]));
+  tray.on("click", showMain);
+  tray.on("double-click", showMain);
+}
+
 // Single instance — a second launch focuses the existing window instead of
 // opening another that would fight over the serial port.
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
-    if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
-  });
+  app.on("second-instance", () => showMain());
 
   app.whenReady().then(() => {
     // Writable data (settings, templates, backups) must live outside the
@@ -120,10 +165,16 @@ if (!app.requestSingleInstanceLock()) {
     backup.configure({ dataDir });
     if (store.loadSettings().auto_switch_enabled) startDetection();
     createWindow();
+    createTray();
   });
 }
 
-app.on("window-all-closed", () => { stopDetection(); link.disconnect(); app.quit(); });
+// Closing the window leaves the app alive in the tray; only a real quit tears down.
+app.on("before-quit", () => { app.isQuitting = true; if (tray) { tray.destroy(); tray = null; } });
+app.on("window-all-closed", () => {
+  if (!app.isQuitting) return;            // keep running in the tray
+  stopDetection(); link.disconnect(); app.quit();
+});
 
 // -- repair a whole profile's actions before upload -------------------------
 function sanitizeProfile(p) {
