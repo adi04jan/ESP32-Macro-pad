@@ -12,13 +12,21 @@
   };
 
   function Settings({ settings, onChange, advancedMode, onAdvancedMode, widgetAlpha, onWidgetAlpha, onTest,
-                      theme = "dark", onToggleTheme, flags = {}, onFlag, onExportAll, onFactoryReset }) {
+                      theme = "dark", onToggleTheme, flags = {}, onFlag, onExportAll, onFactoryReset,
+                      update = {}, onCheckUpdates, onInstallUpdate }) {
     const prov = settings.provider;
     const meta = PROVIDERS[prov];
     const [showKey, setShowKey] = useState(false);
     const [testState, setTestState] = useState(null); // null | "testing" | "ok" | "fail"
     const [showReset, setShowReset] = useState(false);
     const flag = (k, dflt = false) => (flags[k] != null ? flags[k] : dflt);
+    const updateLabel = ({
+      checking: "Checking for updates…",
+      downloading: `Downloading update… ${update.percent != null ? update.percent + "%" : ""}`,
+      downloaded: `Version ${update.version || ""} ready to install`,
+      none: "You're up to date",
+      error: "Update check failed",
+    })[update.status] || "";
     const requestReset = () => { if (flag("confirm_destructive", true)) setShowReset(true); else onFactoryReset && onFactoryReset(); };
     const runTest = () => {
       if (!onTest) return;
@@ -108,6 +116,14 @@
               <div className="row" style={{ gap: 8, marginTop: 12 }}>
                 <Link href="https://github.com/adi04jan" icon="github-logo">GitHub</Link>
                 <Link href="https://www.linkedin.com/in/aditya-biswas-6409b78b/" icon="linkedin-logo">LinkedIn</Link>
+              </div>
+              <div className="divider" />
+              <div className="row between">
+                <span className="fs12 faint">{updateLabel || "Updates"}</span>
+                {update.status === "downloaded"
+                  ? <Btn size="sm" variant="primary" icon="arrow-circle-up" onClick={onInstallUpdate}>Restart to update</Btn>
+                  : <Btn size="sm" icon="arrows-clockwise" onClick={onCheckUpdates}
+                      disabled={update.status === "checking" || update.status === "downloading"}>Check for updates</Btn>}
               </div>
             </Panel>
           </div>

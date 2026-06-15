@@ -60,9 +60,13 @@
     },
     "directories": {
       "output": "dist-build"
-    }
+    },
+    "publish": [
+      { "provider": "github", "owner": "adi04jan", "repo": "ESP32-Macro-pad" }
+    ]
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "serialport": "^13.0.0"
   },
   "devDependencies": {

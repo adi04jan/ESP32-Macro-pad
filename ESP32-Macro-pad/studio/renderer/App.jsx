@@ -74,6 +74,7 @@
     const [settings, setSettings] = useState({ provider: "Ollama (Local)", key: "http://localhost:11434", model: "llama3" });
     const [widgetAlpha, setWidgetAlpha] = useState(0.98);
     const [flags, setFlags] = useState({ widget_stay_on_top: true, widget_snap: true, widget_auto_hide: false, confirm_destructive: true, open_at_login: false });
+    const [update, setUpdate] = useState({ status: "idle" });   // auto-update status from main
 
     const [aiRecs, setAiRecs] = useState({});      // ctxId -> [shortcut]
     const [aiBusy, setAiBusy] = useState(false);
@@ -175,6 +176,7 @@
         else if (type === "leds") { if (simRef.current) simRef.current.setFrame(data); }   // exact live mirror
         else if (type === "key") { if (simRef.current) { const i = (data.key | 0) - 1; data.down ? simRef.current.keyDown(i) : simRef.current.keyUp(i); } }
         else if (type === "idle") { setLiveIdle(data.mode || "none"); }
+        else if (type === "update") { setUpdate(data || { status: "idle" }); }
         else if (type === "profile-active") {
           // The device switched profile on its own (touch pad). Reload that slot
           // into the editor so the UI + overlay reflect it. Skip if we initiated it.
@@ -523,6 +525,13 @@
             {autoAssign && autoAssignLabel &&
               <span className="chip accent" title="Keys are auto-assigned to the focused app (live, not saved)">
                 <Icon name="magic-wand" w="bold" /> Auto · {autoAssignLabel}</span>}
+            {update.status === "downloaded" &&
+              <span className="chip accent" style={{ cursor: "pointer" }} onClick={() => api.installUpdate()}
+                title={`Version ${update.version || ""} downloaded — restart to install`}>
+                <Icon name="arrow-circle-up" w="bold" /> Update ready · Restart</span>}
+            {update.status === "downloading" &&
+              <span className="chip" title="Downloading update…">
+                <Icon name="arrow-circle-down" w="bold" /> Updating{update.percent != null ? ` ${update.percent}%` : "…"}</span>}
             <button className={`conn-pill ${connected ? "on" : ""}`} onClick={() => setView("dashboard")}>
               <span className="conn-dot" /> {connected ? (port || "device") + " · live" : "Offline"}
             </button>
@@ -552,6 +561,7 @@
                 settings, onChange: onChangeSettings, advancedMode: advanced, onAdvancedMode: setAdvanced,
                 widgetAlpha, onWidgetAlpha, onTest: () => api.aiTest(),
                 theme, onToggleTheme, flags, onFlag, onExportAll, onFactoryReset,
+                update, onCheckUpdates: () => api.checkForUpdates(), onInstallUpdate: () => api.installUpdate(),
               })}
             </div>
           </div>

@@ -17,6 +17,7 @@ const backup = require("./services/backup");
 const activewin = require("./services/activewin");
 const { contextForProcess } = require("./services/contexts");
 const { SerialLink, stripCatEcho } = require("./services/serial");
+const { autoUpdater } = require("electron-updater");
 
 const link = new SerialLink();
 let win = null;
@@ -26,6 +27,7 @@ let widgetWin = null;            // always-on-top key overlay
 let widgetProfile = null;        // last profile pushed from the main window
 let widgetIdleTimer = null;      // auto-hide-when-idle timer for the overlay
 let currentContext = "global";   // focused-app context (from window detection)
+let updateState = { status: "idle" };   // auto-update: idle|checking|downloading|downloaded|none|error
 
 const WIDGET_IDLE_MS = 8000;     // hide the overlay after this long without a keypress
 const WIDGET_SNAP_PX = 24;       // snap the overlay to a screen edge within this margin
@@ -125,6 +127,22 @@ function widgetActivity() {
 
 function applyLoginItem(open) { try { app.setLoginItemSettings({ openAtLogin: !!open }); } catch (_) {} }
 
+// Auto-update from GitHub Releases. Status is mirrored to the renderer over the
+// existing event stream as { status, version?, percent?, error? }.
+function sendUpdate(patch) { updateState = { ...updateState, ...patch }; send("update", updateState); }
+function initAutoUpdate() {
+  if (!app.isPackaged) return;   // dev has no app-update.yml
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on("checking-for-update", () => sendUpdate({ status: "checking" }));
+  autoUpdater.on("update-available", (info) => sendUpdate({ status: "downloading", version: info && info.version, percent: 0 }));
+  autoUpdater.on("update-not-available", () => sendUpdate({ status: "none" }));
+  autoUpdater.on("download-progress", (p) => sendUpdate({ status: "downloading", percent: Math.round(p.percent || 0) }));
+  autoUpdater.on("update-downloaded", (info) => sendUpdate({ status: "downloaded", version: info && info.version }));
+  autoUpdater.on("error", (err) => sendUpdate({ status: "error", error: String((err && err.message) || err) }));
+  autoUpdater.checkForUpdates().catch((e) => sendUpdate({ status: "error", error: e.message }));
+}
+
 // Frameless, transparent, always-on-top overlay showing the live key map.
 function createWidgetWindow() {
   const s = store.loadSettings();
@@ -196,6 +214,7 @@ if (!app.requestSingleInstanceLock()) {
     applyLoginItem(boot.open_at_login);
     createWindow();
     createTray();
+    initAutoUpdate();
   });
 }
 
@@ -294,6 +313,17 @@ ipcMain.handle("settings:reset", () => {
   const ok = store.factoryReset();
   applyLoginItem(false);
   return { ok };
+});
+
+ipcMain.handle("update:get", () => updateState);
+ipcMain.handle("update:check", () => {
+  if (!app.isPackaged) { sendUpdate({ status: "none" }); return updateState; }
+  autoUpdater.checkForUpdates().catch((e) => sendUpdate({ status: "error", error: e.message }));
+  return updateState;
+});
+ipcMain.handle("update:install", () => {
+  if (updateState.status === "downloaded") { app.isQuitting = true; autoUpdater.quitAndInstall(); }
+  return true;
 });
 
 ipcMain.handle("templates:get", (_e, ctx) => store.getContextShortcuts(ctx));

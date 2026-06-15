@@ -31,6 +31,11 @@ contextBridge.exposeInMainWorld("api", {
   aiActions: (desc) => ipcRenderer.invoke("ai:generateActions", desc),
   aiTest: () => ipcRenderer.invoke("ai:test"),
 
+  // auto-update
+  getUpdate: () => ipcRenderer.invoke("update:get"),
+  checkForUpdates: () => ipcRenderer.invoke("update:check"),
+  installUpdate: () => ipcRenderer.invoke("update:install"),
+
   // always-on-top key overlay
   toggleWidget: () => ipcRenderer.invoke("widget:toggle"),
   widgetSetProfile: (profile) => ipcRenderer.invoke("widget:setProfile", profile),
