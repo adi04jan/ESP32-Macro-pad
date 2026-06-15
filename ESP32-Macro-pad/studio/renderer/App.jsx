@@ -163,7 +163,7 @@
       const off = api.onEvent(({ type, data }) => {
         if (type === "log") log(data);
         else if (type === "open") {
-          setConnected(true); api.fsinfo();
+          setFlash(null); setConnected(true); api.fsinfo();
           // Sync the editor to the device's active profile (sequenced; no leak).
           const slot = profileRef.current.active || 1;
           api.switchProfile(slot)
@@ -582,7 +582,7 @@
                 profile, connected, port, setPort, ports, onRefreshPorts: refreshPorts, onToggleConn: toggleConn, logs,
                 onUpdateGlobal: updateGlobal, onSetActive: setActive, storage, onReload: reloadProfile, onImport: importDisk, onExport: exportDisk,
                 autoConnect, onToggleAutoConnect, isMacropad, onSetIdle: setIdleAnim, onSetBrightness: setBrightnessVal, saveStatus, onBackupAll: backupAll,
-                fwBundled, fwDevice, flash, onFlash: startFlash, onFlashDismiss: () => setFlash(null),
+                fwBundled, fwDevice, flash, onFlash: startFlash,
               })}
               {view === "auto" && React.createElement(window.AutoSwitcher, {
                 enabled: autoEnabled, onToggle: onToggleAuto, activeCtx, setActiveCtx, regenKey, recsFor, onPush: pushRec, busy: aiBusy, detectedApp,

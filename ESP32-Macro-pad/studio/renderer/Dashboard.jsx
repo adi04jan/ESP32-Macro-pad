@@ -6,12 +6,9 @@
   const { Icon, Btn, IconBtn, Select, Field, Panel, Toggle, Confirm } = window.UI;
   const M = window.MACRO;
 
-  const cmpSemver = (a, b) => { const pa=String(a).split(".").map(Number), pb=String(b).split(".").map(Number);
-    for (let i=0;i<3;i++){ const d=(pa[i]||0)-(pb[i]||0); if(d) return d>0?1:-1; } return 0; };
-
   const SAVE_LABEL = { pending: "Editing…", saving: "Saving…", saved: "Saved ✓", error: "Save failed" };
 
-  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll, fwBundled = {}, fwDevice, flash, onFlash, onFlashDismiss }) {
+  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll, fwBundled = {}, fwDevice, flash, onFlash }) {
     const portOpts = ports.length ? ports.map((p) => ({ value: p.path, label: p.label || p.path })) : [{ value: "", label: "No ports found" }];
     const detected = isMacropad ? ports.find((p) => isMacropad(p)) : null;
     const saveChip = saveStatus && saveStatus !== "idle"
@@ -63,10 +60,10 @@
 
             {(() => {
               const selectedIsMacropad = detected && port && detected.path === port;
-              const outdated = selectedIsMacropad && fwDevice && fwBundled.version && cmpSemver(fwDevice, fwBundled.version) < 0;
+              const outdated = selectedIsMacropad && fwDevice && fwBundled.version && window.api.fwIsOutdated(fwDevice, fwBundled.version);
               const showRecover = port && !selectedIsMacropad && !connected;
-              if (!fwBundled.available || (!showRecover && !outdated)) return null;
               const flashing = flash && flash.phase && flash.phase !== "error" && flash.phase !== "done";
+              if (!fwBundled.available || (!showRecover && !outdated && !flashing)) return null;
               return (
                 <Panel title={outdated ? "Firmware update" : "Flash / recover firmware"} icon="lightning"
                        sub={outdated ? `v${fwDevice} → v${fwBundled.version}` : `No macropad detected on ${port}`}>

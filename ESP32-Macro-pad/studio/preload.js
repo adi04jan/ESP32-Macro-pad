@@ -2,6 +2,7 @@
 "use strict";
 
 const { contextBridge, ipcRenderer } = require("electron");
+const { isOutdated } = require("./services/fwversion");
 
 contextBridge.exposeInMainWorld("api", {
   // device
@@ -41,6 +42,7 @@ contextBridge.exposeInMainWorld("api", {
   // firmware flashing
   flashInfo: () => ipcRenderer.invoke("flash:info"),
   flashStart: (port) => ipcRenderer.invoke("flash:start", port),
+  fwIsOutdated: (deviceVer, bundledVer) => isOutdated(deviceVer, bundledVer),
 
   // always-on-top key overlay
   toggleWidget: () => ipcRenderer.invoke("widget:toggle"),
