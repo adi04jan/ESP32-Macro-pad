@@ -38,6 +38,10 @@ contextBridge.exposeInMainWorld("api", {
   checkForUpdates: () => ipcRenderer.invoke("update:check"),
   installUpdate: () => ipcRenderer.invoke("update:install"),
 
+  // firmware flashing
+  flashInfo: () => ipcRenderer.invoke("flash:info"),
+  flashStart: (port) => ipcRenderer.invoke("flash:start", port),
+
   // always-on-top key overlay
   toggleWidget: () => ipcRenderer.invoke("widget:toggle"),
   widgetSetProfile: (profile) => ipcRenderer.invoke("widget:setProfile", profile),

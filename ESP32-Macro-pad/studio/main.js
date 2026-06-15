@@ -18,6 +18,8 @@ const activewin = require("./services/activewin");
 const { contextForProcess } = require("./services/contexts");
 const { SerialLink, stripCatEcho } = require("./services/serial");
 const { autoUpdater } = require("electron-updater");
+const flasher = require("./services/flasher");
+const { parseStatusVersion } = require("./services/fwversion");
 
 const link = new SerialLink();
 let win = null;
@@ -39,7 +41,13 @@ function sendWidget(channel, data) { if (widgetWin && !widgetWin.isDestroyed()) 
 link.on("log", (text) => send("log", text));
 link.on("fs-info", (info) => send("fs-info", info));
 link.on("ready", () => send("ready"));
-link.on("open", () => send("open"));
+link.on("open", () => {
+  send("open");
+  link.command("status").then((out) => {
+    const v = parseStatusVersion(out);
+    if (v) send("fw-version", { version: v });
+  }).catch(() => {});
+});
 link.on("disconnect", () => send("disconnect"));
 link.on("keyevent", (d) => {
   send("key", d); sendWidget("widget:key", d); widgetActivity();   // overlay press-flash + un-idle
@@ -126,6 +134,19 @@ function widgetActivity() {
 }
 
 function applyLoginItem(open) { try { app.setLoginItemSettings({ openAtLogin: !!open }); } catch (_) {} }
+
+function firmwareDir() {
+  return app.isPackaged ? path.join(process.resourcesPath, "firmware")
+                        : path.resolve(__dirname, "..", "firmware");
+}
+function firmwareInfo() {
+  try {
+    const m = JSON.parse(fs.readFileSync(path.join(firmwareDir(), "manifest.json"), "utf8"));
+    const bin = path.join(firmwareDir(), "macropad.merged.bin");
+    return { version: m.version || null, bin, available: fs.existsSync(bin),
+             size: fs.existsSync(bin) ? fs.statSync(bin).size : 0 };
+  } catch (_) { return { version: null, bin: null, available: false, size: 0 }; }
+}
 
 // Auto-update from GitHub Releases. Status is mirrored to the renderer over the
 // existing event stream as { status, version?, percent?, error? }.
@@ -326,6 +347,25 @@ ipcMain.handle("update:check", () => {
 ipcMain.handle("update:install", () => {
   if (updateState.status === "downloaded") { app.isQuitting = true; autoUpdater.quitAndInstall(); }
   return true;
+});
+
+ipcMain.handle("flash:info", () => { const i = firmwareInfo(); return { version: i.version, available: i.available, size: i.size }; });
+
+let flashing = false;
+ipcMain.handle("flash:start", async (_e, portPath) => {
+  if (flashing) return { ok: false, error: "already flashing" };
+  const info = firmwareInfo();
+  if (!info.available) return { ok: false, error: "no firmware image bundled" };
+  if (!portPath) return { ok: false, error: "no port selected" };
+  flashing = true;
+  if (link.isOpen()) link.disconnect();              // free the port for esptool-js
+  try {
+    await flasher.flashFirmware(portPath, info.bin, (p) => send("flash", p));
+    return { ok: true };
+  } catch (err) {
+    send("flash", { phase: "error", code: err.code || null, error: err.message });
+    return { ok: false, code: err.code || null, error: err.message };
+  } finally { flashing = false; }
 });
 
 ipcMain.handle("templates:get", (_e, ctx) => store.getContextShortcuts(ctx));
