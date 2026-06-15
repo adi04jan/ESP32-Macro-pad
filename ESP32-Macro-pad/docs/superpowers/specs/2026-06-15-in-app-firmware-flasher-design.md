@@ -9,19 +9,26 @@ board still requires the Arduino IDE. New or bricked boards, and users who don't
 want a toolchain, have no in-app path. This feature lets Studio flash the bundled
 macropad firmware directly to an ESP32-S2 over the selected COM port.
 
-It is deliberately **scoped to the "device not recognized" case**: when a selected
-port is not an enumerated macropad (`VID/PID 303A:80C5`), Studio offers to flash —
-with an explicit warning that flashing **erases the whole chip**, including saved
-profiles. This is the backlogged high-risk "one-click firmware updater"; the design
-front-loads safety (hard confirm, chip-type guard, honest download-mode handling).
+There are two entry points, both backed by the same flash engine and the same
+explicit warning that flashing **erases the whole chip**, including saved profiles:
+
+1. **Recover / flash** — a selected port is **not** an enumerated macropad
+   (`VID/PID 303A:80C5`): offer to flash a blank/unrecognized board.
+2. **Update** — a macropad **is** detected, but its reported firmware version is
+   **older than the bundled version**: offer to update it.
+
+This is the backlogged high-risk "one-click firmware updater"; the design front-loads
+safety (hard confirm, chip-type guard, honest download-mode handling).
 
 ## Goals / non-goals
 
-- **Goal:** flash the bundled firmware image to an ESP32-S2 on a chosen port, with
-  progress, safety confirmation, and clear recovery instructions.
-- **Non-goal:** OTA/serial-protocol updates of a *running* macropad, preserving
-  profiles across a flash, or flashing non-S2 targets. Updating an already-detected
-  macropad is out of scope (the flasher is hidden when one is detected).
+- **Goal:** flash the bundled firmware image to an ESP32-S2 on a chosen port (blank
+  board *or* an outdated macropad), with progress, safety confirmation, and clear
+  recovery instructions.
+- **Goal:** read a connected macropad's firmware version and surface an update when
+  it's behind the bundled version.
+- **Non-goal:** OTA/serial-protocol updates that preserve profiles (a flash always
+  erases), and flashing non-ESP32-S2 targets.
 
 ## Architecture
 
@@ -74,16 +81,31 @@ Dashboard (renderer)                main process
 - `flash:cancel` → best-effort abort of an in-flight flash.
 - `preload.js` exposes `flashInfo()`, `flashStart(port)`, `flashCancel()`.
 
+### Device firmware-version detection
+
+- On connect, Studio issues the existing `status` CLI command and parses the
+  `ver:<x.y.z>` field (firmware already prints `FW_VERSION` there). The parsed
+  version is held in app state and emitted to the renderer.
+- Compared against `firmware/manifest.json`'s `version` with a small semver compare:
+  `device < bundled` ⇒ update available; `==`/`>` ⇒ up to date.
+
 ### Renderer / UX (Dashboard)
 
-- Shown only when a port is selected and `!isMacropad(selectedPort)`:
-  - A card: "No macropad detected on `<port>`."
-  - ⚠️ "Flashing **erases everything** on the board, including all saved profiles."
-  - **"Flash firmware v2.1.0"** button → the **`Confirm`** modal (reused from the P1
-    work) with the erase warning → on confirm, a progress view (phase label + % bar).
-  - Download-mode error → inline: "Hold **BOOT**, tap **RESET**, then **Retry**."
-  - Success → "Done — the board will reboot; reconnect on the Device tab," then
-    re-scan ports.
+Both cards reuse the same flash engine, the **`Confirm`** modal (from the P1 work),
+and the same progress view (phase label + % bar). Flashing always shows the erase
+warning.
+
+- **Recover / flash** — when a port is selected and `!isMacropad(selectedPort)`:
+  - "No macropad detected on `<port>`." + ⚠️ "Flashing **erases everything** on the
+    board, including all saved profiles." + **"Flash firmware v2.1.0"** button.
+- **Update** — when a macropad is detected and `deviceVersion < bundledVersion`:
+  - "Firmware update available — `v<device>` → `v2.1.0`." + the same ⚠️ erase warning
+    (updating re-flashes the chip) + **"Update firmware"** button.
+  - When `deviceVersion >= bundledVersion`: a quiet "Firmware up to date (`v…`)" line,
+    no action.
+- Shared outcomes: download-mode error → inline "Hold **BOOT**, tap **RESET**, then
+  **Retry**"; success → "Done — the board will reboot; reconnect on the Device tab,"
+  then re-scan ports.
 
 ## Safety
 
@@ -106,8 +128,10 @@ Layered because a wrong flash bricks hardware:
 
 - **On-device (user):** the actual flash — no hardware in the dev environment.
 - **In dev:** `firmware/` resolves at runtime; `services/flasher.js` loads
-  (`require("esptool-js")` succeeds); the ESP32-S2 chip-guard branch; the UI flow —
-  card appears only when the port isn't a macropad, the `Confirm` gate fires, and the
+  (`require("esptool-js")` succeeds); the ESP32-S2 chip-guard branch; the semver
+  compare (device-version parsing from `status` + outdated detection); the UI flow —
+  the recover card appears only when the port isn't a macropad, the update card only
+  when `deviceVersion < bundledVersion`, the `Confirm` gate fires, and the
   `{type:"flash"}` progress events drive the bar — via `node build.js`, syntax checks,
   and a packaged smoke test.
 
