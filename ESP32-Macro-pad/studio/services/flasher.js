@@ -64,15 +64,25 @@ async function flashFirmware(portPath, binPath, onProgress = () => {}) {
     terminal: { clean() {}, writeLine() {}, write() {} },
   });
 
+  // Tear down esptool's transport without hanging: a failed sync can leave its
+  // reader stuck, so cap the disconnect wait and force-close the underlying port.
+  const cleanup = async () => {
+    await Promise.race([
+      (async () => { try { await transport.disconnect(); } catch (_) {} })(),
+      new Promise((r) => setTimeout(r, 1500)),
+    ]);
+    try { await device.close(); } catch (_) {}
+  };
+
   onProgress({ phase: "connecting", percent: 0 });
   let chip;
   try { chip = await esploader.main(); }      // syncs + detects chip
-  catch (e) { try { await transport.disconnect(); } catch (_) {} throw downloadModeError(e); }
+  catch (e) { await cleanup(); throw downloadModeError(e); }
 
   // Safety: never flash a non-S2 board.
   const name = String(chip || esploader.chip?.CHIP_NAME || "");
   if (!/ESP32-?S2/i.test(name)) {
-    try { await transport.disconnect(); } catch (_) {}
+    await cleanup();
     const e = new Error(`Refusing to flash: detected "${name || "unknown chip"}", expected ESP32-S2.`);
     e.code = "WRONG_CHIP";
     throw e;
@@ -91,7 +101,7 @@ async function flashFirmware(portPath, binPath, onProgress = () => {}) {
     onProgress({ phase: "done", percent: 100 });
     try { await esploader.after("hard_reset"); } catch (_) {}
   } finally {
-    try { await transport.disconnect(); } catch (_) {}
+    await cleanup();
   }
 }
 
