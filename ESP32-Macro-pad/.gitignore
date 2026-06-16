@@ -22,3 +22,7 @@ macropad_usage.json
 # Local user settings: holds the active COM port and AI provider endpoint/API
 # key. Runtime state, never committed. See macropad_settings.example.json.
 macropad_settings.json
+studio/tools/esptool.exe
+
+# Flashable firmware image (4MB build artifact; provide per build / per the README)
+firmware/macropad.merged.bin

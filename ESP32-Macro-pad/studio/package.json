@@ -1,7 +1,7 @@
 {
   "name": "macropad-studio",
   "productName": "Macropad Studio",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Configurator for the ESP32-S2 macropad — device sync + local-AI macro generation.",
   "main": "main.js",
   "author": "Aditya Biswas <adi04jan@gmail.com> (https://github.com/adi04jan)",
@@ -45,6 +45,10 @@
       {
         "from": "../firmware",
         "to": "firmware"
+      },
+      {
+        "from": "tools/esptool.exe",
+        "to": "tools/esptool.exe"
       }
     ],
     "win": {

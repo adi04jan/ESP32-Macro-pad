@@ -62,11 +62,15 @@
               const selectedIsMacropad = detected && port && detected.path === port;
               const outdated = selectedIsMacropad && fwDevice && fwBundled.version && window.api.fwIsOutdated(fwDevice, fwBundled.version);
               const showRecover = port && !selectedIsMacropad && !connected;
+              const showReflash = selectedIsMacropad;   // on-demand flash/update of the detected board
               const flashing = flash && flash.phase && flash.phase !== "error" && flash.phase !== "done";
-              if (!fwBundled.available || (!showRecover && !outdated && !flashing)) return null;
+              if (!fwBundled.available || (!showRecover && !outdated && !showReflash && !flashing)) return null;
+              const title = outdated ? "Firmware update" : showRecover ? "Flash / recover firmware" : "Firmware";
+              const sub = outdated ? `v${fwDevice} → v${fwBundled.version}`
+                : showRecover ? `No macropad detected on ${port}`
+                : `On v${fwDevice || "?"} · v${fwBundled.version} bundled`;
               return (
-                <Panel title={outdated ? "Firmware update" : "Flash / recover firmware"} icon="lightning"
-                       sub={outdated ? `v${fwDevice} → v${fwBundled.version}` : `No macropad detected on ${port}`}>
+                <Panel title={title} icon="lightning" sub={sub}>
                   <div className="fs13" style={{ color: "var(--danger, #ff5d6c)", marginBottom: 10 }}>
                     ⚠ Flashing erases everything on the board, including all saved profiles.
                   </div>
@@ -85,7 +89,7 @@
                           <div style={{ height: "100%", width: (flash.percent || 0) + "%", background: "var(--accent)", borderRadius: 99 }} /></div>
                       </div>
                     : <Btn icon="lightning" variant="danger" onClick={() => setAskFlash(true)}>
-                        {outdated ? "Update firmware" : `Flash firmware v${fwBundled.version}`}</Btn>}
+                        {outdated ? "Update firmware" : showRecover ? `Flash firmware v${fwBundled.version}` : `Re-flash v${fwBundled.version}`}</Btn>}
                   <Confirm open={askFlash}
                     title={outdated ? "Update firmware?" : "Flash firmware?"}
                     message={`This erases the entire board — all profiles are lost — and writes firmware v${fwBundled.version}. The board may need BOOT+RESET to enter flashing mode. Continue?`}
