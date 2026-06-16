@@ -30,6 +30,7 @@ contextBridge.exposeInMainWorld("api", {
   backupAll: () => ipcRenderer.invoke("backup:all"),
   listBackups: () => ipcRenderer.invoke("backup:list"),
   restoreBackup: (id) => ipcRenderer.invoke("backup:restore", id),
+  restoreAllBackups: (activeSlot) => ipcRenderer.invoke("backup:restoreAll", activeSlot),
 
   // settings / templates
   getSettings: () => ipcRenderer.invoke("settings:get"),

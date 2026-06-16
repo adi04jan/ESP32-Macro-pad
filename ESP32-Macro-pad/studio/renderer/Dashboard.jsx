@@ -8,7 +8,7 @@
 
   const SAVE_LABEL = { pending: "Editing…", saving: "Saving…", saved: "Saved ✓", error: "Save failed" };
 
-  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll, fwBundled = {}, fwDevice, flash, onFlash, onListBackups, onRestore }) {
+  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll, fwBundled = {}, fwDevice, flash, onFlash, onListBackups, onRestore, onRestoreAll }) {
     const [showRestore, setShowRestore] = React.useState(false);
     const portOpts = ports.length ? ports.map((p) => ({ value: p.path, label: p.label || p.path })) : [{ value: "", label: "No ports found" }];
     const detected = isMacropad ? ports.find((p) => isMacropad(p)) : null;
@@ -174,13 +174,13 @@
             </Panel>
           </div>
         </div>
-        <RestoreModal open={showRestore} onClose={() => setShowRestore(false)} onListBackups={onListBackups} onRestore={onRestore} />
+        <RestoreModal open={showRestore} onClose={() => setShowRestore(false)} onListBackups={onListBackups} onRestore={onRestore} onRestoreAll={onRestoreAll} connected={connected} />
       </div>
     );
   }
 
   // Lists local backups (newest first) and restores the chosen one into the editor.
-  function RestoreModal({ open, onClose, onListBackups, onRestore }) {
+  function RestoreModal({ open, onClose, onListBackups, onRestore, onRestoreAll, connected }) {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(false);
     useEffect(() => {
@@ -201,7 +201,13 @@
             <IconBtn icon="x" onClick={onClose} />
           </div>
           <div className="fs12 faint" style={{ marginBottom: 12 }}>
-            Loads the snapshot into the editor for the active profile. Save (when connected) to write it to the device.
+            A single backup loads into the editor (Save to apply). “Restore all” writes the latest backup of every profile — keys and LED pattern — straight to the connected device.
+          </div>
+          <div className="row between" style={{ marginBottom: 12, paddingBottom: 12, borderBottom: "1px solid var(--line)" }}>
+            <span className="fs13 fw600">All profiles (latest of each)</span>
+            <Btn size="sm" variant="primary" icon="clock-counter-clockwise" disabled={!connected}
+              title={connected ? "Restore all profiles to the device" : "Connect the device first"}
+              onClick={() => { onRestoreAll && onRestoreAll(); onClose(); }}>Restore all</Btn>
           </div>
           <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
             {loading ? <div className="fs12 faint">Loading…</div>

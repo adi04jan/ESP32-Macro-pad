@@ -313,6 +313,28 @@ ipcMain.handle("backup:restore", (_e, id) => {
   catch (e) { return { ok: false, error: e.message }; }
 });
 
+// Restore the latest backup of every slot straight to the device (keys, idle LED
+// pattern, per-key colours all included — backups are full device-shape profiles),
+// then reload the active slot so it applies live.
+ipcMain.handle("backup:restoreAll", async (_e, activeSlot) => {
+  if (!link.isOpen()) return { ok: false, error: "not connected" };
+  const list = backup.listBackups();
+  const slots = [];
+  for (const slot of [1, 2, 3]) {
+    const latest = list.find((b) => b.slot === slot);   // list is newest-first
+    if (!latest) continue;
+    let prof; try { prof = backup.readBackup(latest.id); } catch (_) { continue; }
+    await link.uploadProfile(`profile${slot}.json`, prof);   // device-shape: keeps idle_animation + led_color
+    slots.push({ slot, from: latest.label });
+  }
+  if (!slots.length) return { ok: false, error: "no backups found for any slot" };
+  const n = activeSlot || 1;
+  await link.setActiveProfile(n);                        // device reloads -> LED pattern + keys apply
+  let active = null;
+  try { active = JSON.parse(stripCatEcho(await link.readFile(`profile${n}.json`))); } catch (_) {}
+  return { ok: true, slots, active };
+});
+
 // -- always-on-top key overlay ----------------------------------------------
 ipcMain.handle("widget:toggle", () => toggleWidget());
 ipcMain.handle("widget:setProfile", (_e, profile) => {

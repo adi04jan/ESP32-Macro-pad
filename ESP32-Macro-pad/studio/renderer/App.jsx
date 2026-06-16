@@ -380,6 +380,17 @@
         log("Backup loaded into the editor — Save (or connect) to write it to the device.", { cls: "ok" });
       } else log(`Restore failed: ${(r && r.error) || "unknown"}`, { cls: "er" });
     }).catch((e) => log(`Restore error: ${e.message}`, { cls: "er" }));
+    // Restore the latest backup of every slot directly to the device (keys + LED patterns).
+    const restoreAll = () => {
+      if (!connectedRef.current) { log("Connect the device to restore all profiles.", { cls: "er" }); return; }
+      log("Restoring all profiles to the device…", { cls: "ac" });
+      api.restoreAllBackups(profileRef.current.active || 1).then((r) => {
+        if (r && r.ok) {
+          if (r.active) { setProfile(fromDevice(r.active, profileRef.current.active)); setSaveStatus("idle"); }
+          log(`Restored ${r.slots.length} profile(s) to the device — keys + LED pattern applied.`, { cls: "ok" });
+        } else log(`Restore all failed: ${(r && r.error) || "unknown"}`, { cls: "er" });
+      }).catch((e) => log(`Restore all error: ${e.message}`, { cls: "er" }));
+    };
 
     // ---- AI + usage-ranked recommendations ----
     const recsFor = (ctxId) => aiRecs[ctxId] || [];
@@ -590,7 +601,7 @@
                 profile, connected, port, setPort, ports, onRefreshPorts: refreshPorts, onToggleConn: toggleConn, logs,
                 onUpdateGlobal: updateGlobal, onSetActive: setActive, storage, onReload: reloadProfile, onImport: importDisk, onExport: exportDisk,
                 autoConnect, onToggleAutoConnect, isMacropad, onSetIdle: setIdleAnim, onSetBrightness: setBrightnessVal, saveStatus, onBackupAll: backupAll,
-                fwBundled, fwDevice, flash, onFlash: startFlash, onListBackups: listBackups, onRestore: restoreBackup,
+                fwBundled, fwDevice, flash, onFlash: startFlash, onListBackups: listBackups, onRestore: restoreBackup, onRestoreAll: restoreAll,
               })}
               {view === "auto" && React.createElement(window.AutoSwitcher, {
                 enabled: autoEnabled, onToggle: onToggleAuto, activeCtx, setActiveCtx, regenKey, recsFor, onPush: pushRec, busy: aiBusy, detectedApp,
