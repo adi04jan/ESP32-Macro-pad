@@ -372,6 +372,14 @@
       if (r && r.ok) log(`Exported ${r.path}`, { cls: "ok" });
       else if (r && r.error) log(`Export failed: ${r.error}`, { cls: "er" });
     });
+    const listBackups = () => api.listBackups();
+    const restoreBackup = (id) => api.restoreBackup(id).then((r) => {
+      if (r && r.ok) {
+        setProfile((p) => fromDevice(r.profile, p.active));
+        setSaveStatus("idle");
+        log("Backup loaded into the editor — Save (or connect) to write it to the device.", { cls: "ok" });
+      } else log(`Restore failed: ${(r && r.error) || "unknown"}`, { cls: "er" });
+    }).catch((e) => log(`Restore error: ${e.message}`, { cls: "er" }));
 
     // ---- AI + usage-ranked recommendations ----
     const recsFor = (ctxId) => aiRecs[ctxId] || [];
@@ -582,7 +590,7 @@
                 profile, connected, port, setPort, ports, onRefreshPorts: refreshPorts, onToggleConn: toggleConn, logs,
                 onUpdateGlobal: updateGlobal, onSetActive: setActive, storage, onReload: reloadProfile, onImport: importDisk, onExport: exportDisk,
                 autoConnect, onToggleAutoConnect, isMacropad, onSetIdle: setIdleAnim, onSetBrightness: setBrightnessVal, saveStatus, onBackupAll: backupAll,
-                fwBundled, fwDevice, flash, onFlash: startFlash,
+                fwBundled, fwDevice, flash, onFlash: startFlash, onListBackups: listBackups, onRestore: restoreBackup,
               })}
               {view === "auto" && React.createElement(window.AutoSwitcher, {
                 enabled: autoEnabled, onToggle: onToggleAuto, activeCtx, setActiveCtx, regenKey, recsFor, onPush: pushRec, busy: aiBusy, detectedApp,

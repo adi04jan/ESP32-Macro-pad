@@ -48,4 +48,52 @@ function manualBackupAll(profiles) {
   } catch (e) { return { ok: false, error: e.message }; }
 }
 
-module.exports = { configure, autoBackup, manualBackupAll };
+// Reconstruct a Date from a stamp like "2026-06-16T10-55-02-674Z".
+function stampToDate(stem) {
+  const iso = stem.replace(/T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z$/, "T$1:$2:$3.$4Z");
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// List every available backup (auto snapshots + manual sets), newest first.
+// Each: { id (relative path under device_backups), kind, slot, time, label }.
+function listBackups() {
+  const out = [];
+  const autoRoot = path.join(BACKUP_ROOT, "auto");
+  if (fs.existsSync(autoRoot)) {
+    for (const pd of fs.readdirSync(autoRoot)) {
+      const m = pd.match(/^profile(\d+)$/); if (!m) continue;
+      const dir = path.join(autoRoot, pd);
+      for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".json"))) {
+        const d = stampToDate(f.replace(/\.json$/, ""));
+        out.push({ id: ["auto", pd, f].join("/"), kind: "auto", slot: parseInt(m[1], 10),
+          time: d ? d.getTime() : 0, label: d ? d.toLocaleString() : f });
+      }
+    }
+  }
+  const manualRoot = path.join(BACKUP_ROOT, "manual");
+  if (fs.existsSync(manualRoot)) {
+    for (const set of fs.readdirSync(manualRoot)) {
+      const sd = path.join(manualRoot, set);
+      let isDir = false; try { isDir = fs.statSync(sd).isDirectory(); } catch (_) {}
+      if (!isDir) continue;
+      const d = stampToDate(set);
+      for (const f of fs.readdirSync(sd).filter((x) => /^profile\d+\.json$/.test(x))) {
+        out.push({ id: ["manual", set, f].join("/"), kind: "manual", slot: parseInt(f.match(/profile(\d+)/)[1], 10),
+          time: d ? d.getTime() : 0, label: d ? d.toLocaleString() : set });
+      }
+    }
+  }
+  out.sort((a, b) => b.time - a.time);
+  return out;
+}
+
+// Read one backup by its (sanitized) id. Refuses anything outside device_backups.
+function readBackup(id) {
+  const root = path.resolve(BACKUP_ROOT);
+  const full = path.resolve(root, String(id));
+  if (full !== root && !full.startsWith(root + path.sep)) throw new Error("invalid backup id");
+  return JSON.parse(fs.readFileSync(full, "utf8"));
+}
+
+module.exports = { configure, autoBackup, manualBackupAll, listBackups, readBackup };

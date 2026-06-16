@@ -28,6 +28,8 @@ contextBridge.exposeInMainWorld("api", {
   autoSave: (slot, profile) => ipcRenderer.invoke("device:autosave", slot, profile),
   switchProfile: (n) => ipcRenderer.invoke("device:switchProfile", n),
   backupAll: () => ipcRenderer.invoke("backup:all"),
+  listBackups: () => ipcRenderer.invoke("backup:list"),
+  restoreBackup: (id) => ipcRenderer.invoke("backup:restore", id),
 
   // settings / templates
   getSettings: () => ipcRenderer.invoke("settings:get"),

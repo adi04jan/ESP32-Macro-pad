@@ -8,7 +8,8 @@
 
   const SAVE_LABEL = { pending: "Editing…", saving: "Saving…", saved: "Saved ✓", error: "Save failed" };
 
-  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll, fwBundled = {}, fwDevice, flash, onFlash }) {
+  function Dashboard({ profile, connected, port, setPort, ports = [], onRefreshPorts, onToggleConn, logs, onUpdateGlobal, onSetActive, storage, onReload, onImport, onExport, autoConnect, onToggleAutoConnect, isMacropad, onSetIdle, onSetBrightness, saveStatus, onBackupAll, fwBundled = {}, fwDevice, flash, onFlash, onListBackups, onRestore }) {
+    const [showRestore, setShowRestore] = React.useState(false);
     const portOpts = ports.length ? ports.map((p) => ({ value: p.path, label: p.label || p.path })) : [{ value: "", label: "No ports found" }];
     const detected = isMacropad ? ports.find((p) => isMacropad(p)) : null;
     const saveChip = saveStatus && saveStatus !== "idle"
@@ -116,6 +117,7 @@
               <div className="row" style={{ gap: 8, marginTop: 12 }}>
                 <Btn className="grow" size="sm" icon="download-simple" disabled={!connected} onClick={onReload}>Reload</Btn>
                 <Btn className="grow" size="sm" icon="archive-box" disabled={!connected} onClick={onBackupAll}>Backup all</Btn>
+                <Btn className="grow" size="sm" icon="clock-counter-clockwise" onClick={() => setShowRestore(true)}>Restore</Btn>
               </div>
 
               <div className="divider" />
@@ -170,6 +172,50 @@
                 ))}
               </div>
             </Panel>
+          </div>
+        </div>
+        <RestoreModal open={showRestore} onClose={() => setShowRestore(false)} onListBackups={onListBackups} onRestore={onRestore} />
+      </div>
+    );
+  }
+
+  // Lists local backups (newest first) and restores the chosen one into the editor.
+  function RestoreModal({ open, onClose, onListBackups, onRestore }) {
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(false);
+    useEffect(() => {
+      if (!open || !onListBackups) return;
+      setLoading(true);
+      Promise.resolve(onListBackups())
+        .then((list) => { setItems(Array.isArray(list) ? list : []); setLoading(false); })
+        .catch(() => setLoading(false));
+    }, [open]);
+    if (!open) return null;
+    return (
+      <div onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        style={{ position: "fixed", inset: 0, zIndex: 1000, display: "grid", placeItems: "center", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(3px)" }}>
+        <div style={{ width: 540, maxWidth: "92vw", maxHeight: "80vh", display: "flex", flexDirection: "column",
+          background: "var(--panel, #1c1c26)", border: "1px solid var(--line-strong, rgba(255,255,255,0.13))", borderRadius: 16, padding: 20 }}>
+          <div className="row between" style={{ marginBottom: 10 }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>Restore a backup</span>
+            <IconBtn icon="x" onClick={onClose} />
+          </div>
+          <div className="fs12 faint" style={{ marginBottom: 12 }}>
+            Loads the snapshot into the editor for the active profile. Save (when connected) to write it to the device.
+          </div>
+          <div style={{ overflowY: "auto", flex: 1, minHeight: 0 }}>
+            {loading ? <div className="fs12 faint">Loading…</div>
+              : items.length === 0
+                ? <div className="fs12 faint">No backups yet — they're created automatically before each device save and via “Backup all.”</div>
+                : items.map((b) => (
+                  <div key={b.id} className="row between" style={{ padding: "9px 0", borderBottom: "1px solid var(--line)" }}>
+                    <div className="col">
+                      <span className="fs13 fw600">Profile {b.slot} · {b.kind === "auto" ? "auto-save" : "manual"}</span>
+                      <span className="fs12 faint mono">{b.label}</span>
+                    </div>
+                    <Btn size="sm" icon="clock-counter-clockwise" onClick={() => { onRestore && onRestore(b.id); onClose(); }}>Restore</Btn>
+                  </div>
+                ))}
           </div>
         </div>
       </div>

@@ -306,6 +306,13 @@ ipcMain.handle("backup:all", async () => {
   return backup.manualBackupAll(profiles);
 });
 
+// List local backups, and read one back for restore (no device contact).
+ipcMain.handle("backup:list", () => { try { return backup.listBackups(); } catch (_) { return []; } });
+ipcMain.handle("backup:restore", (_e, id) => {
+  try { return { ok: true, profile: backup.readBackup(id) }; }
+  catch (e) { return { ok: false, error: e.message }; }
+});
+
 // -- always-on-top key overlay ----------------------------------------------
 ipcMain.handle("widget:toggle", () => toggleWidget());
 ipcMain.handle("widget:setProfile", (_e, profile) => {
