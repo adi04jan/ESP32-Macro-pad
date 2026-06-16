@@ -2,7 +2,16 @@
 "use strict";
 
 const { contextBridge, ipcRenderer } = require("electron");
-const { isOutdated } = require("./services/fwversion");
+
+// Inlined version helper — a sandboxed preload cannot require local app modules
+// (that previously broke window.api entirely). Mirrors services/fwversion.js.
+function isOutdated(deviceVer, bundledVer) {
+  if (!deviceVer || !bundledVer) return false;
+  const pa = String(deviceVer).split(".").map((n) => parseInt(n, 10) || 0);
+  const pb = String(bundledVer).split(".").map((n) => parseInt(n, 10) || 0);
+  for (let i = 0; i < 3; i++) { const d = (pa[i] || 0) - (pb[i] || 0); if (d) return d < 0; }
+  return false;
+}
 
 contextBridge.exposeInMainWorld("api", {
   // device
