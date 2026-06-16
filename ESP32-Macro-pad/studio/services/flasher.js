@@ -12,6 +12,10 @@ const { SerialPort } = require("serialport");
 // setSignals (DTR/RTS), getInfo.
 function makeWebSerialDevice(path) {
   let port = null;
+  // Track line state: Web Serial setSignals() changes only the signals it's
+  // given and leaves the rest as-is. esptool's reset toggles DTR and RTS
+  // independently, so we must NOT reset the unspecified line each call.
+  let dtr = false, rts = false;
   return {
     readable: null,
     writable: null,
@@ -27,9 +31,9 @@ function makeWebSerialDevice(path) {
     },
     async setSignals(sig = {}) {
       if (!port) return;
-      await new Promise((res, rej) => port.set(
-        { dtr: !!sig.dataTerminalReady, rts: !!sig.requestToSend },
-        (e) => (e ? rej(e) : res())));
+      if ("dataTerminalReady" in sig) dtr = !!sig.dataTerminalReady;
+      if ("requestToSend" in sig) rts = !!sig.requestToSend;
+      await new Promise((res, rej) => port.set({ dtr, rts }, (e) => (e ? rej(e) : res())));
     },
     getInfo() { return { usbVendorId: 0x303a }; },
   };
